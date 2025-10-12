@@ -179,7 +179,7 @@
             </video>
             <div id="jumpScreenOverlay">
                 <h1>🎉 Gratulerer! 🎉</h1>
-                <p>Du nådde 100 poeng!</p>
+                <p>Du nådde 30 poeng!</p>
                 <button onclick="closeJumpScreen()">Fortsett Spill</button>
             </div>
         </div>
@@ -335,8 +335,8 @@
                 this.score += 0.1;
                 document.getElementById('score').textContent = `Poeng: ${Math.floor(this.score)}`;
                 
-                // Sjekk om spilleren nådde 100 poeng
-                if (Math.floor(this.score) >= 100 && !this.jumpScreenShown) {
+                // Sjekk om spilleren nådde 30 poeng
+                if (Math.floor(this.score) >= 30 && !this.jumpScreenShown) {
                     this.showJumpScreen();
                 }
                 
