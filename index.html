@@ -609,11 +609,11 @@
                 if (this.imageLoaded) {
                     // Legg til skygge kun når på bakken
                     const jumpHeight = this.player.groundY - this.player.y;
-                    const isOnGround = jumpHeight < 5; // Toleranse for å være "på bakken"
+                    const isOnGround = jumpHeight < 1; // Kun når helt på bakken
                     
                     if (isOnGround) {
-                        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-                        this.ctx.fillRect(this.player.x + 5, this.player.groundY + 1, this.player.width - 10, 4);
+                        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                        this.ctx.fillRect(this.player.x + 3, this.player.groundY + 1, this.player.width - 6, 6);
                     }
                     
                     // Tegn løper-bildet
