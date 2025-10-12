@@ -322,19 +322,21 @@
             // Fjernet createRunnerFrames() og drawRunnerFrame() siden vi bruker sprite sheet nå
             
             setupEventListeners() {
-                // Touch events for iPhone - oppdelt i øvre og nedre halvdel
+                // Touch events for iPhone - klikk for hopp, drag ned for duck
                 this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.handleJump();
+                });
+                
+                this.canvas.addEventListener('touchmove', (e) => {
                     e.preventDefault();
                     const rect = this.canvas.getBoundingClientRect();
                     const touch = e.touches[0];
                     const touchY = touch.clientY - rect.top;
                     const canvasHeight = this.canvas.height;
                     
-                    if (touchY < canvasHeight / 2) {
-                        // Øvre halvdel - hopp
-                        this.handleJump();
-                    } else {
-                        // Nedre halvdel - duck
+                    // Hvis touch beveger seg nedover, aktiver duck
+                    if (touchY > canvasHeight * 0.7) {
                         this.handleDuck();
                     }
                 });
