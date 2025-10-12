@@ -200,33 +200,71 @@
             }
             
             drawRunnerFrame(ctx, frameIndex) {
-                // Tegn en enkel løper-figur som varierer basert på frame
-                ctx.fillStyle = '#8B4513'; // Brun hud
-                ctx.fillRect(10, 5, 20, 15); // Hode
+                // Tegn en realistisk løper-figur med smooth animasjon
                 
-                // Kropp
-                ctx.fillStyle = '#4169E1'; // Blå skjorte
-                ctx.fillRect(8, 20, 24, 20);
+                // Beregn animasjons-offsets
+                const armSwing = Math.sin(frameIndex * 0.8) * 4;
+                const legSwing = Math.sin(frameIndex * 1.2) * 6;
+                const bodyBob = Math.sin(frameIndex * 1.6) * 1;
                 
-                // Armer - varierer med løpe-bevegelse
-                const armOffset = Math.sin(frameIndex * 0.5) * 3;
+                // Hode
+                ctx.fillStyle = '#FDBCB4'; // Hudfarge
+                ctx.beginPath();
+                ctx.arc(20, 8 + bodyBob, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Hår
                 ctx.fillStyle = '#8B4513';
-                ctx.fillRect(5, 22 + armOffset, 8, 12); // Venstre arm
-                ctx.fillRect(27, 22 - armOffset, 8, 12); // Høyre arm
-                
-                // Ben - varierer mer med løpe-bevegelse
-                const legOffset = Math.sin(frameIndex * 0.8) * 8;
-                ctx.fillStyle = '#000080'; // Mørkeblå bukser
-                ctx.fillRect(12, 40 + legOffset, 6, 10); // Venstre ben
-                ctx.fillRect(22, 40 - legOffset, 6, 10); // Høyre ben
+                ctx.beginPath();
+                ctx.arc(20, 6 + bodyBob, 9, Math.PI, Math.PI * 2);
+                ctx.fill();
                 
                 // Øyne
                 ctx.fillStyle = 'white';
-                ctx.fillRect(12, 8, 3, 3);
-                ctx.fillRect(17, 8, 3, 3);
+                ctx.fillRect(16, 6 + bodyBob, 2, 2);
+                ctx.fillRect(22, 6 + bodyBob, 2, 2);
                 ctx.fillStyle = 'black';
-                ctx.fillRect(13, 9, 1, 1);
-                ctx.fillRect(18, 9, 1, 1);
+                ctx.fillRect(16.5, 6.5 + bodyBob, 1, 1);
+                ctx.fillRect(22.5, 6.5 + bodyBob, 1, 1);
+                
+                // Nese
+                ctx.fillStyle = '#E6A085';
+                ctx.fillRect(19, 8 + bodyBob, 2, 1);
+                
+                // Munn
+                ctx.fillStyle = '#8B0000';
+                ctx.fillRect(18, 10 + bodyBob, 4, 1);
+                
+                // Kropp (skjorte)
+                ctx.fillStyle = '#FF6347'; // Tomat-rød skjorte
+                ctx.fillRect(12, 16 + bodyBob, 16, 18);
+                
+                // Armer med løpe-bevegelse
+                ctx.fillStyle = '#FDBCB4';
+                // Venstre arm (swing bakover)
+                ctx.fillRect(8, 18 + bodyBob - armSwing, 6, 12);
+                // Høyre arm (swing fremover)
+                ctx.fillRect(26, 18 + bodyBob + armSwing, 6, 12);
+                
+                // Bukser
+                ctx.fillStyle = '#4169E1'; // Kongeblå bukser
+                ctx.fillRect(14, 34 + bodyBob, 12, 16);
+                
+                // Ben med løpe-bevegelse
+                ctx.fillStyle = '#FDBCB4';
+                // Venstre ben (oppe)
+                ctx.fillRect(15, 50 + bodyBob - legSwing, 4, 8);
+                // Høyre ben (nede)
+                ctx.fillRect(21, 50 + bodyBob + legSwing, 4, 8);
+                
+                // Føtter
+                ctx.fillStyle = '#8B4513'; // Brune sko
+                ctx.fillRect(14, 58 + bodyBob - legSwing, 6, 3);
+                ctx.fillRect(20, 58 + bodyBob + legSwing, 6, 3);
+                
+                // Legg til skygge under figuren
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.fillRect(10, 61, 20, 2);
             }
             
             setupEventListeners() {
@@ -382,49 +420,165 @@
             }
             
             drawBackground() {
-                // Enkel bakgrunn med skyer
-                this.ctx.fillStyle = '#87CEEB';
+                // Himmel med gradient
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height * 0.7);
+                gradient.addColorStop(0, '#87CEEB');
+                gradient.addColorStop(1, '#E0F6FF');
+                this.ctx.fillStyle = gradient;
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height * 0.7);
                 
-                this.ctx.fillStyle = '#98FB98';
+                // Fjell i bakgrunnen
+                this.ctx.fillStyle = '#8B7355';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, this.canvas.height * 0.4);
+                this.ctx.lineTo(this.canvas.width * 0.3, this.canvas.height * 0.2);
+                this.ctx.lineTo(this.canvas.width * 0.6, this.canvas.height * 0.3);
+                this.ctx.lineTo(this.canvas.width, this.canvas.height * 0.35);
+                this.ctx.lineTo(this.canvas.width, this.canvas.height * 0.7);
+                this.ctx.lineTo(0, this.canvas.height * 0.7);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Terreng med gradient
+                const groundGradient = this.ctx.createLinearGradient(0, this.canvas.height * 0.7, 0, this.canvas.height);
+                groundGradient.addColorStop(0, '#8FBC8F');
+                groundGradient.addColorStop(0.5, '#9ACD32');
+                groundGradient.addColorStop(1, '#556B2F');
+                this.ctx.fillStyle = groundGradient;
                 this.ctx.fillRect(0, this.canvas.height * 0.7, this.canvas.width, this.canvas.height * 0.3);
                 
-                // Tegn noen enkle skyer
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                // Tegn skyer med bedre detaljer
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                for (let i = 0; i < 4; i++) {
+                    const x = (i * 200 + Date.now() * 0.005) % (this.canvas.width + 150);
+                    this.drawCloud(x, 40 + i * 20, 40 + i * 10);
+                }
+                
+                // Legg til noen trær i bakgrunnen
+                this.drawBackgroundTrees();
+            }
+            
+            drawCloud(x, y, size) {
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.4, y, size * 0.8, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.8, y, size * 0.6, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.2, y - size * 0.3, size * 0.7, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.6, y - size * 0.3, size * 0.5, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            drawBackgroundTrees() {
+                this.ctx.fillStyle = '#8B4513';
                 for (let i = 0; i < 3; i++) {
-                    const x = (i * 150 + Date.now() * 0.01) % (this.canvas.width + 100);
+                    const x = (i * 300 + Date.now() * 0.002) % (this.canvas.width + 200);
+                    // Trestamme
+                    this.ctx.fillRect(x, this.canvas.height * 0.6, 15, 60);
+                    // Trekrone
+                    this.ctx.fillStyle = '#228B22';
                     this.ctx.beginPath();
-                    this.ctx.arc(x, 50, 30, 0, Math.PI * 2);
-                    this.ctx.arc(x + 25, 50, 35, 0, Math.PI * 2);
-                    this.ctx.arc(x + 50, 50, 30, 0, Math.PI * 2);
+                    this.ctx.arc(x + 7, this.canvas.height * 0.6, 25, 0, Math.PI * 2);
                     this.ctx.fill();
+                    this.ctx.fillStyle = '#8B4513';
                 }
             }
             
             drawObstacles() {
                 this.obstacles.forEach(obstacle => {
                     if (obstacle.type === 'small') {
-                        // Liten stein
-                        this.ctx.fillStyle = '#696969';
-                        this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-                        this.ctx.fillStyle = '#808080';
-                        this.ctx.fillRect(obstacle.x + 2, obstacle.y + 2, obstacle.width - 4, obstacle.height - 4);
+                        this.drawSmallStone(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
                     } else {
-                        // Stor stein
-                        this.ctx.fillStyle = '#2F4F4F';
-                        this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-                        this.ctx.fillStyle = '#696969';
-                        this.ctx.fillRect(obstacle.x + 3, obstacle.y + 3, obstacle.width - 6, obstacle.height - 6);
-                        this.ctx.fillStyle = '#808080';
-                        this.ctx.fillRect(obstacle.x + 6, obstacle.y + 6, obstacle.width - 12, obstacle.height - 12);
+                        this.drawLargeStone(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
                     }
                 });
             }
             
+            drawSmallStone(x, y, width, height) {
+                // Tegn realistisk liten stein
+                this.ctx.fillStyle = '#708090';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2, y + height/2, width/2, height/2, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Legg til tekstur og skygger
+                this.ctx.fillStyle = '#556B7F';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2 - 2, y + height/2 - 2, width/2 - 3, height/2 - 3, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Høylys
+                this.ctx.fillStyle = '#B0C4DE';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2 + 1, y + height/2 - 3, width/4, height/4, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            drawLargeStone(x, y, width, height) {
+                // Tegn realistisk stor stein med flere lag
+                this.ctx.fillStyle = '#2F4F4F';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2, y + height/2, width/2, height/2, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Midterste lag
+                this.ctx.fillStyle = '#696969';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2 - 1, y + height/2 - 1, width/2 - 4, height/2 - 4, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Indre lag
+                this.ctx.fillStyle = '#808080';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2 - 2, y + height/2 - 2, width/2 - 8, height/2 - 8, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Høylys
+                this.ctx.fillStyle = '#D3D3D3';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2 + 2, y + height/2 - 4, width/6, height/6, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Legg til noen sprekker for realistisk utseende
+                this.ctx.strokeStyle = '#1C1C1C';
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x + width/3, y + height/4);
+                this.ctx.lineTo(x + width/2, y + height/2);
+                this.ctx.stroke();
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(x + width*2/3, y + height/3);
+                this.ctx.lineTo(x + width/2, y + height*2/3);
+                this.ctx.stroke();
+            }
+            
             drawPlayer() {
-                // Tegn løper-animasjon
+                // Tegn løper-animasjon med bedre posisjonering
                 const currentFrame = this.runnerFrames[this.player.currentFrame];
+                
+                // Legg til skygge på bakken
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                this.ctx.fillRect(this.player.x + 5, this.player.groundY + 2, this.player.width - 10, 3);
+                
+                // Tegn løperen
                 this.ctx.drawImage(currentFrame, this.player.x, this.player.y - this.player.height);
+                
+                // Legg til løpe-effekter
+                this.drawRunningEffects();
+            }
+            
+            drawRunningEffects() {
+                // Tegn støvpartikler bak løperen
+                if (this.gameState === 'playing') {
+                    this.ctx.fillStyle = 'rgba(139, 69, 19, 0.6)';
+                    for (let i = 0; i < 3; i++) {
+                        const offset = Math.random() * 10;
+                        const size = Math.random() * 3 + 1;
+                        this.ctx.beginPath();
+                        this.ctx.arc(this.player.x - 10 - offset, this.player.groundY + Math.random() * 5, size, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                }
             }
             
             gameLoop() {
