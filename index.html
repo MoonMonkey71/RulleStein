@@ -274,7 +274,7 @@
                 // Fugl-bilde
                 this.birdImage = new Image();
                 this.birdImage.crossOrigin = 'anonymous';
-                this.birdImage.src = 'Pic/Fugl.png?v=' + Date.now();
+                this.birdImage.src = 'Pic/fugl2.png?v=' + Date.now();
                 this.birdImage.onload = () => {
                     this.birdImageLoaded = true;
                     console.log('Bird image loaded successfully:', this.birdImage.width, 'x', this.birdImage.height);
@@ -367,12 +367,14 @@
             handleDuck() {
                 if (this.gameState === 'playing' && !this.player.isJumping) {
                     this.player.isDucking = true;
+                    console.log('Player is now ducking');
                 }
             }
             
             handleDuckRelease() {
                 if (this.gameState === 'playing') {
                     this.player.isDucking = false;
+                    console.log('Player stopped ducking');
                 }
             }
             
@@ -561,10 +563,19 @@
                 const playerMargin = 8; // Reduser kollisjonsområde
                 const obstacleMargin = 4; // Reduser obstacle-kollisjonsområde
                 
+                // Hvis spilleren ducker, reduser høyde for kollisjonsdeteksjon
+                let playerHeight = player.height;
+                let playerY = player.y;
+                
+                if (player.isDucking) {
+                    playerHeight = player.height * 0.7; // Samme som i drawPlayer
+                    playerY = player.groundY - playerHeight;
+                }
+                
                 return player.x + playerMargin < obstacle.x + obstacle.width - obstacleMargin &&
                        player.x + player.width - playerMargin > obstacle.x + obstacleMargin &&
-                       player.y + playerMargin < obstacle.y + obstacle.height - obstacleMargin &&
-                       player.y + player.height - playerMargin > obstacle.y + obstacleMargin;
+                       playerY + playerMargin < obstacle.y + obstacle.height - obstacleMargin &&
+                       playerY + playerHeight - playerMargin > obstacle.y + obstacleMargin;
             }
             
             render() {
