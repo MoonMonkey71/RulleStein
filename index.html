@@ -503,12 +503,18 @@
                     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
                     this.ctx.fillRect(this.player.x + 5, this.player.groundY + 2, this.player.width - 10, 3);
                     
+                    // Tegn sprite frame med solid bakgrunn
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 1.0; // Sørg for at figuren ikke er gjennomsiktig
+                    
                     // Tegn sprite frame
                     this.ctx.drawImage(
                         this.runnerSprite,
                         frameX, frameY, this.spriteFrameWidth, this.spriteFrameHeight,
                         this.player.x, this.player.y - this.player.height, this.player.width, this.player.height
                     );
+                    
+                    this.ctx.restore();
                 } else {
                     // Fallback: tegn en enkel firkant mens sprite laster
                     this.ctx.fillStyle = '#FF6347';
