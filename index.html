@@ -242,6 +242,7 @@
                     height: 50,
                     velocityY: 0,
                     isJumping: false,
+                    isDucking: false,
                     groundY: 0,
                     currentFrame: 0,
                     frameCount: 0
@@ -273,7 +274,7 @@
                 // Fugl-bilde
                 this.birdImage = new Image();
                 this.birdImage.crossOrigin = 'anonymous';
-                this.birdImage.src = 'Pic/Picture 1.png?v=' + Date.now();
+                this.birdImage.src = 'Pic/Fugl.png?v=' + Date.now();
                 this.birdImage.onload = () => {
                     this.birdImageLoaded = true;
                     console.log('Bird image loaded successfully:', this.birdImage.width, 'x', this.birdImage.height);
@@ -283,6 +284,20 @@
                     this.birdImageLoaded = false;
                 };
                 this.birdImageLoaded = false;
+                
+                // Duck-bilde (mann på huk)
+                this.duckImage = new Image();
+                this.duckImage.crossOrigin = 'anonymous';
+                this.duckImage.src = 'Pic/cartoon_man_sitting.png?v=' + Date.now();
+                this.duckImage.onload = () => {
+                    this.duckImageLoaded = true;
+                    console.log('Duck image loaded successfully:', this.duckImage.width, 'x', this.duckImage.height);
+                };
+                this.duckImage.onerror = (e) => {
+                    console.error('Failed to load duck image:', e);
+                    this.duckImageLoaded = false;
+                };
+                this.duckImageLoaded = false;
                 
                 this.setupEventListeners();
                 this.gameLoop();
@@ -316,11 +331,23 @@
                     this.handleJump();
                 });
                 
-                // Keyboard for testing
+                // Keyboard events for PC
                 document.addEventListener('keydown', (e) => {
-                    if (e.code === 'Space') {
+                    if (this.gameState === 'playing') {
+                        if (e.key === 'ArrowUp' || e.key === ' ' || e.code === 'Space') {
+                            e.preventDefault();
+                            this.handleJump();
+                        } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            this.handleDuck();
+                        }
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    if (e.key === 'ArrowDown') {
                         e.preventDefault();
-                        this.handleJump();
+                        this.handleDuckRelease();
                     }
                 });
                 
@@ -331,9 +358,21 @@
             }
             
             handleJump() {
-                if (this.gameState === 'playing' && !this.player.isJumping) {
+                if (this.gameState === 'playing' && !this.player.isJumping && !this.player.isDucking) {
                     this.player.velocityY = this.jumpPower;
                     this.player.isJumping = true;
+                }
+            }
+            
+            handleDuck() {
+                if (this.gameState === 'playing' && !this.player.isJumping) {
+                    this.player.isDucking = true;
+                }
+            }
+            
+            handleDuckRelease() {
+                if (this.gameState === 'playing') {
+                    this.player.isDucking = false;
                 }
             }
             
@@ -345,6 +384,7 @@
                 this.player.y = this.player.groundY;
                 this.player.velocityY = 0;
                 this.player.isJumping = false;
+                this.player.isDucking = false;
                 this.obstacles = [];
                 this.obstacleTimer = 0;
                 this.birds = [];
@@ -505,7 +545,7 @@
                     
                     const bird = {
                         x: this.canvas.width,
-                        y: this.player.groundY - birdHeight - Math.random() * 50, // Flyr over bakken
+                        y: this.player.groundY - birdHeight - 80 - Math.random() * 40, // Flyr høyere opp
                         width: birdWidth,
                         height: birdHeight,
                         type: 'bird'
@@ -717,8 +757,24 @@
             }
             
             drawPlayer() {
-                // Tegn løper med enkelt bilde
-                if (this.imageLoaded) {
+                // Tegn løper med enkelt bilde eller duck-bilde
+                if (this.player.isDucking && this.duckImageLoaded) {
+                    // Tegn duck-bildet (mann på huk)
+                    const duckHeight = this.player.height * 0.7; // Litt lavere når på huk
+                    const duckY = this.player.groundY - duckHeight;
+                    
+                    this.ctx.drawImage(
+                        this.duckImage,
+                        this.player.x, duckY, this.player.width, duckHeight
+                    );
+                    
+                    // Skygge for ducking
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                    const shadowWidth = (this.player.width - 6) * 0.67;
+                    const shadowX = this.player.x + 3 + ((this.player.width - 6) - shadowWidth) / 2;
+                    this.ctx.fillRect(shadowX, this.player.groundY + 1, shadowWidth, 3);
+                    
+                } else if (this.imageLoaded) {
                     // Legg til gradvis skygge basert på hopp-høyde
                     const jumpHeight = this.player.groundY - this.player.y;
                     const shadowOpacity = Math.max(0, 0.3 - (jumpHeight * 0.02)); // Gradvis fade-out
@@ -748,8 +804,10 @@
                     this.ctx.fillText('Loading image...', this.player.x, this.player.y - this.player.height - 5);
                 }
                 
-                // Legg til løpe-effekter
-                this.drawRunningEffects();
+                // Legg til løpe-effekter (kun når ikke på huk)
+                if (!this.player.isDucking) {
+                    this.drawRunningEffects();
+                }
             }
             
             drawRunningEffects() {
