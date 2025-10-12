@@ -639,15 +639,20 @@
             }
             
             drawRunningEffects() {
-                // Tegn støvpartikler bak løperen
+                // Tegn støvpartikler kun når løperen løper på bakken
                 if (this.gameState === 'playing') {
-                    this.ctx.fillStyle = 'rgba(139, 69, 19, 0.6)';
-                    for (let i = 0; i < 4; i++) {
-                        const offset = Math.random() * 5; // Redusert fra 10 til 5
-                        const size = Math.random() * 2 + 1; // Redusert størrelse
-                        this.ctx.beginPath();
-                        this.ctx.arc(this.player.x - 5 - offset, this.player.groundY + Math.random() * 3, size, 0, Math.PI * 2);
-                        this.ctx.fill();
+                    const jumpHeight = this.player.groundY - this.player.y;
+                    const isOnGround = jumpHeight < 2; // Kun når på bakken
+                    
+                    if (isOnGround) {
+                        this.ctx.fillStyle = 'rgba(139, 69, 19, 0.6)';
+                        for (let i = 0; i < 3; i++) {
+                            const offset = Math.random() * 5;
+                            const size = Math.random() * 2 + 1;
+                            this.ctx.beginPath();
+                            this.ctx.arc(this.player.x - 5 - offset, this.player.groundY + Math.random() * 3, size, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
                     }
                 }
             }
