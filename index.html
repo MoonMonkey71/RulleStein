@@ -540,8 +540,8 @@
                 this.birdTimer++;
                 
                 if (this.birdTimer > this.birdInterval / 16) { // 60 FPS
-                    const birdHeight = this.player.height * 0.6; // Proporsjonert til løperen
-                    const birdWidth = birdHeight * 1.2; // Fugler er litt bredere enn høye
+                    const birdHeight = this.player.height * 0.4; // Mindre fugl (40% av løperen)
+                    const birdWidth = birdHeight * 1.0; // Mer kvadratisk form
                     
                     const bird = {
                         x: this.canvas.width,
