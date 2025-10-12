@@ -614,7 +614,9 @@
                     
                     if (shadowOpacity > 0) {
                         this.ctx.fillStyle = `rgba(0, 0, 0, ${shadowOpacity})`;
-                        this.ctx.fillRect(this.player.x + 3, this.player.groundY + 1, this.player.width - 6, shadowSize);
+                        const shadowWidth = (this.player.width - 6) * 0.67; // 2/3 av bredden
+                        const shadowX = this.player.x + 3 + ((this.player.width - 6) - shadowWidth) / 2; // Sentrert
+                        this.ctx.fillRect(shadowX, this.player.groundY + 1, shadowWidth, shadowSize);
                     }
                     
                     // Tegn løper-bildet
