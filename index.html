@@ -255,7 +255,7 @@
                 
                 // Enkelt løper-bilde
                 this.runnerImage = new Image();
-                this.runnerImage.src = 'Pic/running_character_transparent.png';
+                this.runnerImage.src = 'Pic/running_character_transparent.png?v=' + Date.now();
                 this.runnerImage.onload = () => {
                     this.imageLoaded = true;
                     console.log('Runner image loaded successfully');
