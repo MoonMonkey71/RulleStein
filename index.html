@@ -322,10 +322,26 @@
             // Fjernet createRunnerFrames() og drawRunnerFrame() siden vi bruker sprite sheet nå
             
             setupEventListeners() {
-                // Touch events for iPhone
+                // Touch events for iPhone - oppdelt i øvre og nedre halvdel
                 this.canvas.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    this.handleJump();
+                    const rect = this.canvas.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    const touchY = touch.clientY - rect.top;
+                    const canvasHeight = this.canvas.height;
+                    
+                    if (touchY < canvasHeight / 2) {
+                        // Øvre halvdel - hopp
+                        this.handleJump();
+                    } else {
+                        // Nedre halvdel - duck
+                        this.handleDuck();
+                    }
+                });
+                
+                this.canvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.handleDuckRelease();
                 });
                 
                 // Mouse events for testing
@@ -838,12 +854,6 @@
                     this.drawRunningEffects();
                 }
                 
-                // Vis dobbelt-hopp indikasjon
-                if (this.player.canDoubleJump && this.player.isJumping) {
-                    this.ctx.fillStyle = 'rgba(255, 255, 0, 0.7)';
-                    this.ctx.font = '12px Arial';
-                    this.ctx.fillText('Dobbelt-hopp!', this.player.x, this.player.y - this.player.height - 10);
-                }
             }
             
             drawRunningEffects() {
