@@ -322,10 +322,14 @@
             }
             
             checkCollision(player, obstacle) {
-                return player.x < obstacle.x + obstacle.width &&
-                       player.x + player.width > obstacle.x &&
-                       player.y < obstacle.y + obstacle.height &&
-                       player.y + player.height > obstacle.y;
+                // Juster kollisjonsområde for mer nøyaktig deteksjon
+                const playerMargin = 8; // Reduser kollisjonsområde
+                const obstacleMargin = 4; // Reduser obstacle-kollisjonsområde
+                
+                return player.x + playerMargin < obstacle.x + obstacle.width - obstacleMargin &&
+                       player.x + player.width - playerMargin > obstacle.x + obstacleMargin &&
+                       player.y + playerMargin < obstacle.y + obstacle.height - obstacleMargin &&
+                       player.y + player.height - playerMargin > obstacle.y + obstacleMargin;
             }
             
             render() {
@@ -413,6 +417,13 @@
                     } else {
                         this.drawLargeStone(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
                     }
+                    
+                    // Debug: vis kollisjonsområde (fjern denne linjen senere)
+                    if (this.gameState === 'playing') {
+                        this.ctx.strokeStyle = 'red';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.strokeRect(obstacle.x + 4, obstacle.y + 4, obstacle.width - 8, obstacle.height - 8);
+                    }
                 });
             }
             
@@ -487,6 +498,14 @@
                         this.runnerImage,
                         this.player.x, this.player.y - this.player.height, this.player.width, this.player.height
                     );
+                    
+                    // Debug: vis kollisjonsområde (fjern denne linjen senere)
+                    if (this.gameState === 'playing') {
+                        this.ctx.strokeStyle = 'blue';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.strokeRect(this.player.x + 8, this.player.y - this.player.height + 8, 
+                                          this.player.width - 16, this.player.height - 16);
+                    }
                 } else {
                     // Fallback: tegn en enkel firkant mens bilde laster
                     this.ctx.fillStyle = '#FF6347';
