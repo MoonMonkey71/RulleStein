@@ -176,9 +176,9 @@
                 this.spriteLoaded = false;
                 
                 // Sprite sheet properties for ny fil
-                this.spriteFrameWidth = 64;  // Bredde på hver frame
-                this.spriteFrameHeight = 64; // Høyde på hver frame
-                this.spriteFramesPerRow = 3; // Antall frames per rad
+                this.spriteFrameWidth = 48;  // Bredde på hver frame
+                this.spriteFrameHeight = 48; // Høyde på hver frame
+                this.spriteFramesPerRow = 6; // Antall frames per rad
                 this.totalFrames = 6; // Total antall frames i animasjonen
                 
                 this.setupEventListeners();
@@ -502,16 +502,12 @@
                     this.ctx.fillStyle = `rgba(0, 0, 0, ${shadowOpacity})`;
                     this.ctx.fillRect(this.player.x + 8, this.player.groundY + 1, this.player.width - 16, shadowSize);
                     
-                    // Tegn solid bakgrunn først
-                    this.ctx.fillStyle = '#FF6347';
-                    this.ctx.fillRect(this.player.x, this.player.y - this.player.height, this.player.width, this.player.height);
-                    
                     // Beregn hvilken frame som skal vises
                     const frameIndex = this.player.currentFrame % this.totalFrames;
                     const frameX = (frameIndex % this.spriteFramesPerRow) * this.spriteFrameWidth;
                     const frameY = Math.floor(frameIndex / this.spriteFramesPerRow) * this.spriteFrameHeight;
                     
-                    // Tegn sprite frame over bakgrunnen
+                    // Tegn sprite frame direkte (uten bakgrunn)
                     this.ctx.drawImage(
                         this.runnerSprite,
                         frameX, frameY, this.spriteFrameWidth, this.spriteFrameHeight,
