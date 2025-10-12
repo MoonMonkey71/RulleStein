@@ -607,13 +607,14 @@
             drawPlayer() {
                 // Tegn løper med enkelt bilde
                 if (this.imageLoaded) {
-                    // Legg til skygge kun når på bakken
+                    // Legg til gradvis skygge basert på hopp-høyde
                     const jumpHeight = this.player.groundY - this.player.y;
-                    const isOnGround = jumpHeight < 1; // Kun når helt på bakken
+                    const shadowOpacity = Math.max(0, 0.4 - (jumpHeight * 0.02)); // Mer skygge når på bakken
+                    const shadowSize = Math.max(0, 6 - (jumpHeight * 0.1)); // Større skygge når på bakken
                     
-                    if (isOnGround) {
-                        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-                        this.ctx.fillRect(this.player.x + 3, this.player.groundY + 1, this.player.width - 6, 6);
+                    if (shadowOpacity > 0) {
+                        this.ctx.fillStyle = `rgba(0, 0, 0, ${shadowOpacity})`;
+                        this.ctx.fillRect(this.player.x + 3, this.player.groundY + 1, this.player.width - 6, shadowSize);
                     }
                     
                     // Tegn løper-bildet
