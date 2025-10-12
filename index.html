@@ -4,6 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Rulle Stein - Løpe Spill</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H3HHRG6C8T"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-H3HHRG6C8T');
+        
+        // Spill-spesifikke events
+        function trackGameStart() {
+            gtag('event', 'game_start', {
+                'event_category': 'game',
+                'event_label': 'rulle_stein'
+            });
+        }
+        
+        function trackGameScore(score) {
+            gtag('event', 'game_score', {
+                'event_category': 'game',
+                'event_label': 'rulle_stein',
+                'value': score
+            });
+        }
+        
+        function trackJumpScreen() {
+            gtag('event', 'jump_screen', {
+                'event_category': 'game',
+                'event_label': 'rulle_stein'
+            });
+        }
+    </script>
     <style>
         * {
             margin: 0;
@@ -297,6 +329,11 @@
                 this.obstacles = [];
                 this.obstacleTimer = 0;
                 
+                // Track game start
+                if (typeof trackGameStart === 'function') {
+                    trackGameStart();
+                }
+                
                 document.getElementById('startScreen').style.display = 'none';
                 document.getElementById('gameOverScreen').style.display = 'none';
                 document.getElementById('jumpScreen').style.display = 'none';
@@ -307,6 +344,11 @@
                 this.gameState = 'paused';
                 document.getElementById('jumpScreen').style.display = 'flex';
                 
+                // Track jump screen
+                if (typeof trackJumpScreen === 'function') {
+                    trackJumpScreen();
+                }
+                
                 // Spill videoen
                 const video = document.getElementById('jumpVideo');
                 video.currentTime = 0;
@@ -315,7 +357,13 @@
             
             gameOver() {
                 this.gameState = 'gameOver';
-                document.getElementById('finalScore').textContent = `Poeng: ${this.score}`;
+                document.getElementById('finalScore').textContent = `Poeng: ${Math.floor(this.score)}`;
+                
+                // Track final score
+                if (typeof trackGameScore === 'function') {
+                    trackGameScore(Math.floor(this.score));
+                }
+                
                 document.getElementById('gameOverScreen').style.display = 'flex';
             }
             
