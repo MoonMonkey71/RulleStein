@@ -65,6 +65,52 @@
             z-index: 10;
         }
         
+        #jumpScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 15;
+        }
+        
+        #jumpVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #jumpScreenOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        
+        #jumpScreenOverlay h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        #jumpScreenOverlay p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        
         h1 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
@@ -126,6 +172,17 @@
             <p id="finalScore">Poeng: 0</p>
             <button onclick="restartGame()">Spill Igjen</button>
         </div>
+        
+        <div id="jumpScreen">
+            <video id="jumpVideo" autoplay muted>
+                <source src="Pic/20251012_1955_New Video_simple_compose_01k7cs0aake63s9qbrf7e2ejgh.mp4" type="video/mp4">
+            </video>
+            <div id="jumpScreenOverlay">
+                <h1>🎉 Gratulerer! 🎉</h1>
+                <p>Du nådde 100 poeng!</p>
+                <button onclick="closeJumpScreen()">Fortsett Spill</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -141,6 +198,7 @@
                 this.gameState = 'start'; // start, playing, gameOver
                 this.score = 0;
                 this.gameSpeed = 2;
+                this.jumpScreenShown = false;
                 this.gravity = 0.6;
                 this.jumpPower = -12;
                 
@@ -232,6 +290,7 @@
                 this.gameState = 'playing';
                 this.score = 0;
                 this.gameSpeed = 2;
+                this.jumpScreenShown = false;
                 this.player.y = this.player.groundY;
                 this.player.velocityY = 0;
                 this.player.isJumping = false;
@@ -240,6 +299,18 @@
                 
                 document.getElementById('startScreen').style.display = 'none';
                 document.getElementById('gameOverScreen').style.display = 'none';
+                document.getElementById('jumpScreen').style.display = 'none';
+            }
+            
+            showJumpScreen() {
+                this.jumpScreenShown = true;
+                this.gameState = 'paused';
+                document.getElementById('jumpScreen').style.display = 'flex';
+                
+                // Spill videoen
+                const video = document.getElementById('jumpVideo');
+                video.currentTime = 0;
+                video.play();
             }
             
             gameOver() {
@@ -263,6 +334,11 @@
                 // Oppdater score
                 this.score += 0.1;
                 document.getElementById('score').textContent = `Poeng: ${Math.floor(this.score)}`;
+                
+                // Sjekk om spilleren nådde 100 poeng
+                if (Math.floor(this.score) >= 100 && !this.jumpScreenShown) {
+                    this.showJumpScreen();
+                }
                 
                 // Øk hastighet over tid
                 this.gameSpeed += 0.001;
@@ -551,6 +627,13 @@
         function restartGame() {
             if (game) {
                 game.startGame();
+            }
+        }
+        
+        function closeJumpScreen() {
+            if (game) {
+                document.getElementById('jumpScreen').style.display = 'none';
+                game.gameState = 'playing';
             }
         }
         
