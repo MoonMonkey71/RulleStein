@@ -168,14 +168,18 @@
                 this.runnerSprite.src = 'Pic/A_2D_digital_illustration_sprite_sheet_showcases_e.png';
                 this.runnerSprite.onload = () => {
                     this.spriteLoaded = true;
+                    console.log('Sprite sheet loaded successfully');
+                };
+                this.runnerSprite.onerror = () => {
+                    console.error('Failed to load sprite sheet');
                 };
                 this.spriteLoaded = false;
                 
                 // Sprite sheet properties (juster basert på din sprite sheet)
-                this.spriteFrameWidth = 64;  // Bredde på hver frame
-                this.spriteFrameHeight = 64; // Høyde på hver frame
-                this.spriteFramesPerRow = 8; // Antall frames per rad
-                this.totalFrames = 12; // Total antall frames i animasjonen
+                this.spriteFrameWidth = 32;  // Bredde på hver frame
+                this.spriteFrameHeight = 32; // Høyde på hver frame
+                this.spriteFramesPerRow = 4; // Antall frames per rad
+                this.totalFrames = 8; // Total antall frames i animasjonen
                 
                 this.setupEventListeners();
                 this.gameLoop();
@@ -273,8 +277,8 @@
             updatePlayer() {
                 // Oppdater løpe-animasjon
                 this.player.frameCount++;
-                if (this.player.frameCount >= 3) {
-                    this.player.currentFrame = (this.player.currentFrame + 1) % this.runnerFrames.length;
+                if (this.player.frameCount >= 4) {
+                    this.player.currentFrame = (this.player.currentFrame + 1) % this.totalFrames;
                     this.player.frameCount = 0;
                 }
                 
@@ -490,6 +494,11 @@
                     const frameX = (frameIndex % this.spriteFramesPerRow) * this.spriteFrameWidth;
                     const frameY = Math.floor(frameIndex / this.spriteFramesPerRow) * this.spriteFrameHeight;
                     
+                    // Debug logging
+                    if (this.player.frameCount === 0) {
+                        console.log(`Drawing frame ${frameIndex}: x=${frameX}, y=${frameY}`);
+                    }
+                    
                     // Legg til skygge på bakken
                     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
                     this.ctx.fillRect(this.player.x + 5, this.player.groundY + 2, this.player.width - 10, 3);
@@ -504,6 +513,11 @@
                     // Fallback: tegn en enkel firkant mens sprite laster
                     this.ctx.fillStyle = '#FF6347';
                     this.ctx.fillRect(this.player.x, this.player.y - this.player.height, this.player.width, this.player.height);
+                    
+                    // Vis tekst at sprite laster
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = '12px Arial';
+                    this.ctx.fillText('Loading sprite...', this.player.x, this.player.y - this.player.height - 5);
                 }
                 
                 // Legg til løpe-effekter
