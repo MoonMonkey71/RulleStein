@@ -483,9 +483,9 @@
             drawPlayer() {
                 // Tegn løper med enkelt bilde
                 if (this.imageLoaded) {
-                    // Legg til skygge på bakken
-                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-                    this.ctx.fillRect(this.player.x + 5, this.player.groundY + 2, this.player.width - 10, 3);
+                    // Legg til subtil skygge på bakken
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                    this.ctx.fillRect(this.player.x + 8, this.player.groundY + 1, this.player.width - 16, 2);
                     
                     // Tegn løper-bildet
                     this.ctx.drawImage(
