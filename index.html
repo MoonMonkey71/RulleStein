@@ -323,27 +323,43 @@
             
             setupEventListeners() {
                 // Touch events for iPhone - klikk for hopp, drag ned for duck
+                let touchStartY = 0;
+                let isDragging = false;
+                
                 this.canvas.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    this.handleJump();
+                    const rect = this.canvas.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    touchStartY = touch.clientY - rect.top;
+                    isDragging = false;
+                    
+                    // Hvis touch starter i nedre del av skjermen, start duck
+                    if (touchStartY > this.canvas.height * 0.6) {
+                        this.handleDuck();
+                        isDragging = true;
+                    } else {
+                        this.handleJump();
+                    }
                 });
                 
                 this.canvas.addEventListener('touchmove', (e) => {
                     e.preventDefault();
-                    const rect = this.canvas.getBoundingClientRect();
-                    const touch = e.touches[0];
-                    const touchY = touch.clientY - rect.top;
-                    const canvasHeight = this.canvas.height;
-                    
-                    // Hvis touch beveger seg nedover, aktiver duck
-                    if (touchY > canvasHeight * 0.7) {
-                        this.handleDuck();
+                    if (isDragging) {
+                        const rect = this.canvas.getBoundingClientRect();
+                        const touch = e.touches[0];
+                        const touchY = touch.clientY - rect.top;
+                        
+                        // Hvis touch beveger seg nedover fra startposisjon
+                        if (touchY > touchStartY + 20) {
+                            this.handleDuck();
+                        }
                     }
                 });
                 
                 this.canvas.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     this.handleDuckRelease();
+                    isDragging = false;
                 });
                 
                 // Mouse events for testing
