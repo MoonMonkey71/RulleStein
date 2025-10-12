@@ -200,71 +200,71 @@
             }
             
             drawRunnerFrame(ctx, frameIndex) {
-                // Tegn en realistisk løper-figur med smooth animasjon
+                // Tegn en realistisk løper-figur som løper mot høyre
                 
                 // Beregn animasjons-offsets
-                const armSwing = Math.sin(frameIndex * 0.8) * 4;
-                const legSwing = Math.sin(frameIndex * 1.2) * 6;
+                const armSwing = Math.sin(frameIndex * 0.8) * 3;
+                const legSwing = Math.sin(frameIndex * 1.2) * 5;
                 const bodyBob = Math.sin(frameIndex * 1.6) * 1;
                 
-                // Hode
+                // Hode (profil mot høyre)
                 ctx.fillStyle = '#FDBCB4'; // Hudfarge
                 ctx.beginPath();
-                ctx.arc(20, 8 + bodyBob, 8, 0, Math.PI * 2);
+                ctx.arc(25, 15 + bodyBob, 7, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Hår
+                // Hår (sett fra siden)
                 ctx.fillStyle = '#8B4513';
                 ctx.beginPath();
-                ctx.arc(20, 6 + bodyBob, 9, Math.PI, Math.PI * 2);
+                ctx.arc(25, 12 + bodyBob, 8, Math.PI * 0.5, Math.PI * 1.5);
                 ctx.fill();
                 
-                // Øyne
+                // Øye (sett fra siden)
                 ctx.fillStyle = 'white';
-                ctx.fillRect(16, 6 + bodyBob, 2, 2);
-                ctx.fillRect(22, 6 + bodyBob, 2, 2);
+                ctx.fillRect(28, 13 + bodyBob, 2, 2);
                 ctx.fillStyle = 'black';
-                ctx.fillRect(16.5, 6.5 + bodyBob, 1, 1);
-                ctx.fillRect(22.5, 6.5 + bodyBob, 1, 1);
+                ctx.fillRect(28.5, 13.5 + bodyBob, 1, 1);
                 
-                // Nese
+                // Nese (profil)
                 ctx.fillStyle = '#E6A085';
-                ctx.fillRect(19, 8 + bodyBob, 2, 1);
+                ctx.fillRect(30, 15 + bodyBob, 2, 1);
                 
-                // Munn
+                // Munn (profil)
                 ctx.fillStyle = '#8B0000';
-                ctx.fillRect(18, 10 + bodyBob, 4, 1);
+                ctx.fillRect(29, 17 + bodyBob, 3, 1);
                 
-                // Kropp (skjorte)
+                // Kropp (skjorte) - sett fra siden
                 ctx.fillStyle = '#FF6347'; // Tomat-rød skjorte
-                ctx.fillRect(12, 16 + bodyBob, 16, 18);
+                ctx.fillRect(15, 22 + bodyBob, 20, 15);
                 
-                // Armer med løpe-bevegelse
+                // Arm fremover (mot høyre)
                 ctx.fillStyle = '#FDBCB4';
-                // Venstre arm (swing bakover)
-                ctx.fillRect(8, 18 + bodyBob - armSwing, 6, 12);
-                // Høyre arm (swing fremover)
-                ctx.fillRect(26, 18 + bodyBob + armSwing, 6, 12);
+                ctx.fillRect(35, 24 + bodyBob - armSwing, 8, 4);
                 
-                // Bukser
+                // Arm bakover
+                ctx.fillStyle = '#FDBCB4';
+                ctx.fillRect(12, 24 + bodyBob + armSwing, 8, 4);
+                
+                // Bukser (sett fra siden)
                 ctx.fillStyle = '#4169E1'; // Kongeblå bukser
-                ctx.fillRect(14, 34 + bodyBob, 12, 16);
+                ctx.fillRect(17, 37 + bodyBob, 16, 12);
                 
-                // Ben med løpe-bevegelse
+                // Ben fremover (mot høyre)
                 ctx.fillStyle = '#FDBCB4';
-                // Venstre ben (oppe)
-                ctx.fillRect(15, 50 + bodyBob - legSwing, 4, 8);
-                // Høyre ben (nede)
-                ctx.fillRect(21, 50 + bodyBob + legSwing, 4, 8);
+                ctx.fillRect(30, 49 + bodyBob - legSwing, 4, 8);
                 
-                // Føtter
+                // Ben bakover
+                ctx.fillStyle = '#FDBCB4';
+                ctx.fillRect(16, 49 + bodyBob + legSwing, 4, 8);
+                
+                // Føtter (sett fra siden)
                 ctx.fillStyle = '#8B4513'; // Brune sko
-                ctx.fillRect(14, 58 + bodyBob - legSwing, 6, 3);
-                ctx.fillRect(20, 58 + bodyBob + legSwing, 6, 3);
+                ctx.fillRect(28, 57 + bodyBob - legSwing, 8, 3);
+                ctx.fillRect(14, 57 + bodyBob + legSwing, 8, 3);
                 
                 // Legg til skygge under figuren
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-                ctx.fillRect(10, 61, 20, 2);
+                ctx.fillRect(10, 60, 30, 2);
             }
             
             setupEventListeners() {
