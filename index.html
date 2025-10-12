@@ -609,10 +609,10 @@
                 if (this.imageLoaded) {
                     // Legg til gradvis skygge basert på hopp-høyde
                     const jumpHeight = this.player.groundY - this.player.y;
-                    const shadowOpacity = Math.max(0, 0.4 - (jumpHeight * 0.02)); // Mer skygge når på bakken
-                    const shadowSize = Math.max(0, 6 - (jumpHeight * 0.1)); // Større skygge når på bakken
+                    const shadowOpacity = Math.max(0, 0.4 - (jumpHeight * 0.05)); // Raskere fade-out
+                    const shadowSize = Math.max(0, 6 - (jumpHeight * 0.2)); // Raskere størrelse-reduksjon
                     
-                    if (shadowOpacity > 0) {
+                    if (shadowOpacity > 0.05) { // Kun vise hvis synlig nok
                         this.ctx.fillStyle = `rgba(0, 0, 0, ${shadowOpacity})`;
                         this.ctx.fillRect(this.player.x + 3, this.player.groundY + 1, this.player.width - 6, shadowSize);
                     }
