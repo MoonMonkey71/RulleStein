@@ -253,6 +253,11 @@
                 this.obstacles = [];
                 this.obstacleTimer = 0;
                 
+                // Birds
+                this.birds = [];
+                this.birdTimer = 0;
+                this.birdInterval = 5000; // Fugler kommer hver 5. sekund
+                
                 // Enkelt løper-bilde
                 this.runnerImage = new Image();
                 this.runnerImage.src = 'Pic/running_character_transparent.png?v=' + Date.now();
@@ -264,6 +269,18 @@
                     console.error('Failed to load runner image');
                 };
                 this.imageLoaded = false;
+                
+                // Fugl-bilde
+                this.birdImage = new Image();
+                this.birdImage.src = 'Pic/Picture 1.png?v=' + Date.now();
+                this.birdImage.onload = () => {
+                    this.birdImageLoaded = true;
+                    console.log('Bird image loaded successfully');
+                };
+                this.birdImage.onerror = () => {
+                    console.error('Failed to load bird image');
+                };
+                this.birdImageLoaded = false;
                 
                 this.setupEventListeners();
                 this.gameLoop();
@@ -328,6 +345,8 @@
                 this.player.isJumping = false;
                 this.obstacles = [];
                 this.obstacleTimer = 0;
+                this.birds = [];
+                this.birdTimer = 0;
                 
                 // Track game start
                 if (typeof trackGameStart === 'function') {
@@ -376,8 +395,14 @@
                 // Oppdater obstacles
                 this.updateObstacles();
                 
+                // Oppdater fugler
+                this.updateBirds();
+                
                 // Generer nye obstacles
                 this.generateObstacles();
+                
+                // Generer nye fugler
+                this.generateBirds();
                 
                 // Oppdater score
                 this.score += 0.1;
@@ -445,6 +470,45 @@
                 }
             }
             
+            updateBirds() {
+                for (let i = this.birds.length - 1; i >= 0; i--) {
+                    const bird = this.birds[i];
+                    bird.x -= this.gameSpeed + 1; // Fugler flyr litt raskere
+                    
+                    // Fjern fugler som har flydd ut av skjermen
+                    if (bird.x + bird.width < 0) {
+                        this.birds.splice(i, 1);
+                        continue;
+                    }
+                    
+                    // Sjekk kollisjon med spiller
+                    if (this.checkCollision(this.player, bird)) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+            }
+            
+            generateBirds() {
+                this.birdTimer++;
+                
+                if (this.birdTimer > this.birdInterval / 16) { // 60 FPS
+                    const birdHeight = this.player.height * 0.6; // Proporsjonert til løperen
+                    const birdWidth = birdHeight * 1.2; // Fugler er litt bredere enn høye
+                    
+                    const bird = {
+                        x: this.canvas.width,
+                        y: this.player.groundY - birdHeight - Math.random() * 50, // Flyr over bakken
+                        width: birdWidth,
+                        height: birdHeight,
+                        type: 'bird'
+                    };
+                    
+                    this.birds.push(bird);
+                    this.birdTimer = 0;
+                }
+            }
+            
             checkCollision(player, obstacle) {
                 // Juster kollisjonsområde for mer nøyaktig deteksjon
                 const playerMargin = 8; // Reduser kollisjonsområde
@@ -465,6 +529,9 @@
                 
                 // Tegn obstacles
                 this.drawObstacles();
+                
+                // Tegn fugler
+                this.drawBirds();
                 
                 // Tegn spiller
                 this.drawPlayer();
@@ -542,6 +609,32 @@
                         this.drawLargeStone(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
                     }
                     
+                });
+            }
+            
+            drawBirds() {
+                this.birds.forEach(bird => {
+                    if (this.birdImageLoaded) {
+                        // Tegn fugl-bildet
+                        this.ctx.drawImage(
+                            this.birdImage,
+                            bird.x, bird.y, bird.width, bird.height
+                        );
+                    } else {
+                        // Fallback: tegn en enkel fugl-form
+                        this.ctx.fillStyle = '#8B4513';
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(bird.x + bird.width/2, bird.y + bird.height/2, 
+                                        bird.width/2, bird.height/2, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // Vinger
+                        this.ctx.fillStyle = '#654321';
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(bird.x + bird.width/3, bird.y + bird.height/3, 
+                                        bird.width/3, bird.height/4, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
                 });
             }
             
