@@ -133,7 +133,6 @@
             constructor() {
                 this.canvas = document.getElementById('gameCanvas');
                 this.ctx = this.canvas.getContext('2d');
-                this.setupCanvas();
                 
                 this.gameState = 'start'; // start, playing, gameOver
                 this.score = 0;
@@ -153,6 +152,8 @@
                     currentFrame: 0,
                     frameCount: 0
                 };
+                
+                this.setupCanvas();
                 
                 // Obstacles
                 this.obstacles = [];
