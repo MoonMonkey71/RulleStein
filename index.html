@@ -438,9 +438,14 @@
         let game;
         
         function startGame() {
+            console.log('startGame() called');
             if (!game) {
+                console.log('Creating new game instance');
                 game = new RulleSteinGame();
+            } else {
+                console.log('Using existing game instance');
             }
+            console.log('Calling game.startGame()');
             game.startGame();
         }
         
@@ -452,6 +457,7 @@
         
         // Initialize game when page loads but don't start it
         window.addEventListener('load', () => {
+            console.log('Page loaded, initializing game');
             game = new RulleSteinGame();
         });
     </script>
