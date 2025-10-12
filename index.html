@@ -272,13 +272,15 @@
                 
                 // Fugl-bilde
                 this.birdImage = new Image();
+                this.birdImage.crossOrigin = 'anonymous';
                 this.birdImage.src = 'Pic/Picture 1.png?v=' + Date.now();
                 this.birdImage.onload = () => {
                     this.birdImageLoaded = true;
-                    console.log('Bird image loaded successfully');
+                    console.log('Bird image loaded successfully:', this.birdImage.width, 'x', this.birdImage.height);
                 };
-                this.birdImage.onerror = () => {
-                    console.error('Failed to load bird image');
+                this.birdImage.onerror = (e) => {
+                    console.error('Failed to load bird image:', e);
+                    this.birdImageLoaded = false;
                 };
                 this.birdImageLoaded = false;
                 
@@ -407,6 +409,11 @@
                 // Oppdater score
                 this.score += 0.1;
                 document.getElementById('score').textContent = `Poeng: ${Math.floor(this.score)}`;
+                
+                // Debug: vis bilde-status
+                if (this.birds.length > 0 && !this.birdImageLoaded) {
+                    console.log('Bird image not loaded, using fallback');
+                }
                 
                 // Sjekk om spilleren nådde 200 poeng
                 if (Math.floor(this.score) >= 200 && !this.jumpScreenShown) {
@@ -614,12 +621,19 @@
             
             drawBirds() {
                 this.birds.forEach(bird => {
-                    if (this.birdImageLoaded) {
+                    if (this.birdImageLoaded && this.birdImage.complete) {
+                        // Sørg for at bildet tegnes riktig med transparens
+                        this.ctx.save();
+                        this.ctx.globalAlpha = 1.0;
+                        this.ctx.globalCompositeOperation = 'source-over';
+                        
                         // Tegn fugl-bildet
                         this.ctx.drawImage(
                             this.birdImage,
                             bird.x, bird.y, bird.width, bird.height
                         );
+                        
+                        this.ctx.restore();
                     } else {
                         // Fallback: tegn en enkel fugl-form
                         this.ctx.fillStyle = '#8B4513';
@@ -634,6 +648,11 @@
                         this.ctx.ellipse(bird.x + bird.width/3, bird.y + bird.height/3, 
                                         bird.width/3, bird.height/4, 0, 0, Math.PI * 2);
                         this.ctx.fill();
+                        
+                        // Debug tekst
+                        this.ctx.fillStyle = 'white';
+                        this.ctx.font = '10px Arial';
+                        this.ctx.fillText('Bird fallback', bird.x, bird.y - 5);
                     }
                 });
             }
