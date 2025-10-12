@@ -503,11 +503,15 @@
                     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
                     this.ctx.fillRect(this.player.x + 5, this.player.groundY + 2, this.player.width - 10, 3);
                     
-                    // Tegn sprite frame med solid bakgrunn
-                    this.ctx.save();
-                    this.ctx.globalAlpha = 1.0; // Sørg for at figuren ikke er gjennomsiktig
+                    // Tegn solid bakgrunn først
+                    this.ctx.fillStyle = '#FF6347'; // Samme farge som fallback
+                    this.ctx.fillRect(this.player.x, this.player.y - this.player.height, this.player.width, this.player.height);
                     
-                    // Tegn sprite frame
+                    // Tegn sprite frame over bakgrunnen med composite operation
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 1.0;
+                    this.ctx.globalCompositeOperation = 'source-over'; // Sikrer solid tegning
+                    
                     this.ctx.drawImage(
                         this.runnerSprite,
                         frameX, frameY, this.spriteFrameWidth, this.spriteFrameHeight,
