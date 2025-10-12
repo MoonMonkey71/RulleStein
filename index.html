@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Rulle Stein - Løpe Spill</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(to bottom, #87CEEB, #98FB98);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #gameCanvas {
+            border: none;
+            background: linear-gradient(to bottom, #87CEEB, #98FB98);
+            display: block;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+        
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 10;
+        }
+        
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            touch-action: manipulation;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        #score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+        
+        #instructions {
+            text-align: center;
+            margin: 20px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="score">Poeng: 0</div>
+        
+        <div id="startScreen">
+            <h1>🏃‍♂️ Rulle Stein</h1>
+            <div id="instructions">
+                <p>Trykk på skjermen for å hoppe!</p>
+                <p>Unngå steinene som kommer mot deg.</p>
+                <p>Høye steiner krever lengre hopp.</p>
+            </div>
+            <button onclick="startGame()">Start Spill</button>
+        </div>
+        
+        <div id="gameOverScreen">
+            <h1>Game Over!</h1>
+            <p id="finalScore">Poeng: 0</p>
+            <button onclick="restartGame()">Spill Igjen</button>
+        </div>
+    </div>
+
+    <script>
+        class RulleSteinGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.setupCanvas();
+                
+                this.gameState = 'start'; // start, playing, gameOver
+                this.score = 0;
+                this.gameSpeed = 2;
+                this.gravity = 0.6;
+                this.jumpPower = -12;
+                
+                // Spiller
+                this.player = {
+                    x: 100,
+                    y: 0,
+                    width: 40,
+                    height: 50,
+                    velocityY: 0,
+                    isJumping: false,
+                    groundY: 0,
+                    currentFrame: 0,
+                    frameCount: 0
+                };
+                
+                // Obstacles
+                this.obstacles = [];
+                this.obstacleTimer = 0;
+                
+                // Animation frames for runner
+                this.runnerFrames = [];
+                this.createRunnerFrames();
+                
+                this.setupEventListeners();
+                this.gameLoop();
+            }
+            
+            setupCanvas() {
+                const container = document.getElementById('gameContainer');
+                this.canvas.width = Math.min(window.innerWidth, 400);
+                this.canvas.height = Math.min(window.innerHeight, 600);
+                
+                this.player.groundY = this.canvas.height - 100;
+                this.player.y = this.player.groundY;
+            }
+            
+            createRunnerFrames() {
+                // Lag 12 forskjellige løpe-frames
+                for (let i = 0; i < 12; i++) {
+                    const frame = document.createElement('canvas');
+                    frame.width = this.player.width;
+                    frame.height = this.player.height;
+                    const ctx = frame.getContext('2d');
+                    
+                    // Tegn løper med forskjellige posisjoner
+                    this.drawRunnerFrame(ctx, i);
+                    this.runnerFrames.push(frame);
+                }
+            }
+            
+            drawRunnerFrame(ctx, frameIndex) {
+                // Tegn en enkel løper-figur som varierer basert på frame
+                ctx.fillStyle = '#8B4513'; // Brun hud
+                ctx.fillRect(10, 5, 20, 15); // Hode
+                
+                // Kropp
+                ctx.fillStyle = '#4169E1'; // Blå skjorte
+                ctx.fillRect(8, 20, 24, 20);
+                
+                // Armer - varierer med løpe-bevegelse
+                const armOffset = Math.sin(frameIndex * 0.5) * 3;
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(5, 22 + armOffset, 8, 12); // Venstre arm
+                ctx.fillRect(27, 22 - armOffset, 8, 12); // Høyre arm
+                
+                // Ben - varierer mer med løpe-bevegelse
+                const legOffset = Math.sin(frameIndex * 0.8) * 8;
+                ctx.fillStyle = '#000080'; // Mørkeblå bukser
+                ctx.fillRect(12, 40 + legOffset, 6, 10); // Venstre ben
+                ctx.fillRect(22, 40 - legOffset, 6, 10); // Høyre ben
+                
+                // Øyne
+                ctx.fillStyle = 'white';
+                ctx.fillRect(12, 8, 3, 3);
+                ctx.fillRect(17, 8, 3, 3);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(13, 9, 1, 1);
+                ctx.fillRect(18, 9, 1, 1);
+            }
+            
+            setupEventListeners() {
+                // Touch events for iPhone
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.handleJump();
+                });
+                
+                // Mouse events for testing
+                this.canvas.addEventListener('click', (e) => {
+                    this.handleJump();
+                });
+                
+                // Keyboard for testing
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        this.handleJump();
+                    }
+                });
+                
+                // Resize handling
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                });
+            }
+            
+            handleJump() {
+                if (this.gameState === 'playing' && !this.player.isJumping) {
+                    this.player.velocityY = this.jumpPower;
+                    this.player.isJumping = true;
+                }
+            }
+            
+            startGame() {
+                this.gameState = 'playing';
+                this.score = 0;
+                this.gameSpeed = 2;
+                this.player.y = this.player.groundY;
+                this.player.velocityY = 0;
+                this.player.isJumping = false;
+                this.obstacles = [];
+                this.obstacleTimer = 0;
+                
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('gameOverScreen').style.display = 'none';
+            }
+            
+            gameOver() {
+                this.gameState = 'gameOver';
+                document.getElementById('finalScore').textContent = `Poeng: ${this.score}`;
+                document.getElementById('gameOverScreen').style.display = 'flex';
+            }
+            
+            update() {
+                if (this.gameState !== 'playing') return;
+                
+                // Oppdater spiller
+                this.updatePlayer();
+                
+                // Oppdater obstacles
+                this.updateObstacles();
+                
+                // Generer nye obstacles
+                this.generateObstacles();
+                
+                // Oppdater score
+                this.score += 0.1;
+                document.getElementById('score').textContent = `Poeng: ${Math.floor(this.score)}`;
+                
+                // Øk hastighet over tid
+                this.gameSpeed += 0.001;
+            }
+            
+            updatePlayer() {
+                // Oppdater løpe-animasjon
+                this.player.frameCount++;
+                if (this.player.frameCount >= 3) {
+                    this.player.currentFrame = (this.player.currentFrame + 1) % this.runnerFrames.length;
+                    this.player.frameCount = 0;
+                }
+                
+                // Fysikk
+                if (this.player.isJumping) {
+                    this.player.velocityY += this.gravity;
+                    this.player.y += this.player.velocityY;
+                    
+                    if (this.player.y >= this.player.groundY) {
+                        this.player.y = this.player.groundY;
+                        this.player.velocityY = 0;
+                        this.player.isJumping = false;
+                    }
+                }
+            }
+            
+            updateObstacles() {
+                for (let i = this.obstacles.length - 1; i >= 0; i--) {
+                    const obstacle = this.obstacles[i];
+                    obstacle.x -= this.gameSpeed;
+                    
+                    // Fjern obstacles som er utenfor skjermen
+                    if (obstacle.x + obstacle.width < 0) {
+                        this.obstacles.splice(i, 1);
+                        continue;
+                    }
+                    
+                    // Sjekk kollisjon
+                    if (this.checkCollision(this.player, obstacle)) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+            }
+            
+            generateObstacles() {
+                this.obstacleTimer++;
+                
+                if (this.obstacleTimer > 120 - this.gameSpeed * 10) {
+                    const obstacleType = Math.random() < 0.7 ? 'small' : 'large';
+                    const obstacle = {
+                        x: this.canvas.width,
+                        y: this.player.groundY,
+                        width: obstacleType === 'small' ? 20 : 30,
+                        height: obstacleType === 'small' ? 30 : 50,
+                        type: obstacleType
+                    };
+                    
+                    this.obstacles.push(obstacle);
+                    this.obstacleTimer = 0;
+                }
+            }
+            
+            checkCollision(player, obstacle) {
+                return player.x < obstacle.x + obstacle.width &&
+                       player.x + player.width > obstacle.x &&
+                       player.y < obstacle.y + obstacle.height &&
+                       player.y + player.height > obstacle.y;
+            }
+            
+            render() {
+                // Tøm canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Tegn bakgrunn
+                this.drawBackground();
+                
+                // Tegn obstacles
+                this.drawObstacles();
+                
+                // Tegn spiller
+                this.drawPlayer();
+            }
+            
+            drawBackground() {
+                // Enkel bakgrunn med skyer
+                this.ctx.fillStyle = '#87CEEB';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height * 0.7);
+                
+                this.ctx.fillStyle = '#98FB98';
+                this.ctx.fillRect(0, this.canvas.height * 0.7, this.canvas.width, this.canvas.height * 0.3);
+                
+                // Tegn noen enkle skyer
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                for (let i = 0; i < 3; i++) {
+                    const x = (i * 150 + Date.now() * 0.01) % (this.canvas.width + 100);
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, 50, 30, 0, Math.PI * 2);
+                    this.ctx.arc(x + 25, 50, 35, 0, Math.PI * 2);
+                    this.ctx.arc(x + 50, 50, 30, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+            
+            drawObstacles() {
+                this.obstacles.forEach(obstacle => {
+                    if (obstacle.type === 'small') {
+                        // Liten stein
+                        this.ctx.fillStyle = '#696969';
+                        this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                        this.ctx.fillStyle = '#808080';
+                        this.ctx.fillRect(obstacle.x + 2, obstacle.y + 2, obstacle.width - 4, obstacle.height - 4);
+                    } else {
+                        // Stor stein
+                        this.ctx.fillStyle = '#2F4F4F';
+                        this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                        this.ctx.fillStyle = '#696969';
+                        this.ctx.fillRect(obstacle.x + 3, obstacle.y + 3, obstacle.width - 6, obstacle.height - 6);
+                        this.ctx.fillStyle = '#808080';
+                        this.ctx.fillRect(obstacle.x + 6, obstacle.y + 6, obstacle.width - 12, obstacle.height - 12);
+                    }
+                });
+            }
+            
+            drawPlayer() {
+                // Tegn løper-animasjon
+                const currentFrame = this.runnerFrames[this.player.currentFrame];
+                this.ctx.drawImage(currentFrame, this.player.x, this.player.y - this.player.height);
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Global functions for buttons
+        let game;
+        
+        function startGame() {
+            game = new RulleSteinGame();
+        }
+        
+        function restartGame() {
+            if (game) {
+                game.startGame();
+            }
+        }
+        
+        // Start game when page loads
+        window.addEventListener('load', () => {
+            game = new RulleSteinGame();
+        });
+    </script>
+</body>
+</html>
