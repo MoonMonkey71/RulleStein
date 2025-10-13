@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Rulle Stein - Løpe Spill</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H3HHRG6C8T"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-H3HHRG6C8T');
+        
+        // Spill-spesifikke events
+        function trackGameStart() {
+            gtag('event', 'game_start', {
+                'event_category': 'game',
+                'event_label': 'rulle_stein'
+            });
+        }
+        
+        function trackGameScore(score) {
+            gtag('event', 'game_score', {
+                'event_category': 'game',
+                'event_label': 'rulle_stein',
+                'value': score
+            });
+        }
+        
+        function trackJumpScreen() {
+            gtag('event', 'jump_screen', {
+                'event_category': 'game',
+                'event_label': 'rulle_stein'
+            });
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(to bottom, #87CEEB, #98FB98);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #gameCanvas {
+            border: none;
+            background: linear-gradient(to bottom, #87CEEB, #98FB98);
+            display: block;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+        
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 10;
+        }
+        
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 10;
+        }
+        
+        #jumpScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 15;
+        }
+        
+        #jumpVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #jumpScreenOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        
+        #jumpScreenOverlay h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        #jumpScreenOverlay p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            touch-action: manipulation;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        #score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+        
+        #instructions {
+            text-align: center;
+            margin: 20px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="score">Poeng: 0</div>
+        
+        <div id="startScreen">
+            <h1>🏃‍♂️ Rulle Stein</h1>
+            <div id="instructions">
+                <p>Trykk oppe på skjermen for å hoppe!</p>
+                <p>Trykk nede for å dukke</p>
+            </div>
+            <button onclick="startGame()">Start Spill</button>
+        </div>
+        
+        <div id="gameOverScreen">
+            <h1>Game Over!</h1>
+            <p id="finalScore">Poeng: 0</p>
+            <button onclick="restartGame()">Spill Igjen</button>
+        </div>
+        
+        <div id="jumpScreen">
+            <video id="jumpVideo" autoplay muted>
+                <source src="Pic/sun12 klippet.mp4" type="video/mp4">
+            </video>
+            <div id="jumpScreenOverlay">
+                <h1>🎉 Gratulerer! 🎉</h1>
+                <p>Du nådde 200 poeng!</p>
+                <button onclick="closeJumpScreen()">Fortsett Spill</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class RulleSteinGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                if (!this.canvas) {
+                    console.error('Canvas element not found!');
+                    return;
+                }
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.gameState = 'start'; // start, playing, gameOver
+                this.score = 0;
+                this.gameSpeed = 2;
+                this.jumpScreenShown = false;
+                this.gravity = 0.6;
+                this.jumpPower = -12;
+                
+                // Spiller
+                this.player = {
+                    x: 100,
+                    y: 0,
+                    width: 40,
+                    height: 50,
+                    velocityY: 0,
+                    isJumping: false,
+                    isDucking: false,
+                    canDoubleJump: false,
+                    hasDoubleJumped: false,
+                    groundY: 0,
+                    currentFrame: 0,
+                    frameCount: 0
+                };
+                
+                this.setupCanvas();
+                
+                // Obstacles
+                this.obstacles = [];
+                this.obstacleTimer = 0;
+                
+                // Birds
+                this.birds = [];
+                this.birdTimer = 0;
+                this.birdInterval = 5000; // Fugler kommer hver 5. sekund
+                
+                // Enkelt løper-bilde
+                this.runnerImage = new Image();
+                this.runnerImage.src = 'Pic/running_character_transparent.png?v=' + Date.now();
+                this.runnerImage.onload = () => {
+                    this.imageLoaded = true;
+                    console.log('Runner image loaded successfully');
+                };
+                this.runnerImage.onerror = () => {
+                    console.error('Failed to load runner image');
+                };
+                this.imageLoaded = false;
+                
+                // Fugl-bilde
+                this.birdImage = new Image();
+                this.birdImage.crossOrigin = 'anonymous';
+                this.birdImage.src = 'Pic/fugl2.png?v=' + Date.now();
+                this.birdImage.onload = () => {
+                    this.birdImageLoaded = true;
+                    console.log('Bird image loaded successfully:', this.birdImage.width, 'x', this.birdImage.height);
+                };
+                this.birdImage.onerror = (e) => {
+                    console.error('Failed to load bird image:', e);
+                    this.birdImageLoaded = false;
+                };
+                this.birdImageLoaded = false;
+                
+                // Duck-bilde (mann på huk)
+                this.duckImage = new Image();
+                this.duckImage.crossOrigin = 'anonymous';
+                this.duckImage.src = 'Pic/cartoon_man_sitting.png?v=' + Date.now();
+                this.duckImage.onload = () => {
+                    this.duckImageLoaded = true;
+                    console.log('Duck image loaded successfully:', this.duckImage.width, 'x', this.duckImage.height);
+                };
+                this.duckImage.onerror = (e) => {
+                    console.error('Failed to load duck image:', e);
+                    this.duckImageLoaded = false;
+                };
+                this.duckImageLoaded = false;
+                
+                this.setupEventListeners();
+                this.gameLoop();
+            }
+            
+            setupCanvas() {
+                const container = document.getElementById('gameContainer');
+                this.canvas.width = Math.min(window.innerWidth, 400);
+                this.canvas.height = Math.min(window.innerHeight, 600);
+                
+                if (!this.player) {
+                    console.error('Player object is undefined in setupCanvas!');
+                    return;
+                }
+                
+                this.player.groundY = this.canvas.height - 100;
+                this.player.y = this.player.groundY;
+            }
+            
+            // Fjernet createRunnerFrames() og drawRunnerFrame() siden vi bruker sprite sheet nå
+            
+            setupEventListeners() {
+                // Touch events for iPhone - klikk for hopp, drag ned for duck
+                let touchStartY = 0;
+                let isDragging = false;
+                
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const rect = this.canvas.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    touchStartY = touch.clientY - rect.top;
+                    isDragging = false;
+                    
+                    // Hvis touch starter i nedre del av skjermen, start duck
+                    if (touchStartY > this.canvas.height * 0.6) {
+                        this.handleDuck();
+                        isDragging = true;
+                    } else {
+                        this.handleJump();
+                    }
+                });
+                
+                this.canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    if (isDragging) {
+                        const rect = this.canvas.getBoundingClientRect();
+                        const touch = e.touches[0];
+                        const touchY = touch.clientY - rect.top;
+                        
+                        // Hvis touch beveger seg nedover fra startposisjon
+                        if (touchY > touchStartY + 20) {
+                            this.handleDuck();
+                        }
+                    }
+                });
+                
+                this.canvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.handleDuckRelease();
+                    isDragging = false;
+                });
+                
+                // Mouse events for testing
+                this.canvas.addEventListener('click', (e) => {
+                    this.handleJump();
+                });
+                
+                // Keyboard events for PC
+                document.addEventListener('keydown', (e) => {
+                    if (this.gameState === 'playing') {
+                        if (e.key === 'ArrowUp' || e.key === ' ' || e.code === 'Space') {
+                            e.preventDefault();
+                            this.handleJump();
+                        } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            this.handleDuck();
+                        }
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        this.handleDuckRelease();
+                    }
+                });
+                
+                // Resize handling
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                });
+            }
+            
+            handleJump() {
+                if (this.gameState === 'playing' && !this.player.isDucking) {
+                    if (!this.player.isJumping) {
+                        // Første hopp
+                        this.player.velocityY = this.jumpPower;
+                        this.player.isJumping = true;
+                        this.player.canDoubleJump = true;
+                        this.player.hasDoubleJumped = false;
+                        console.log('First jump');
+                    } else if (this.player.canDoubleJump && !this.player.hasDoubleJumped) {
+                        // Dobbelthopp
+                        this.player.velocityY = this.jumpPower * 1.2; // Høyere hopp
+                        this.player.canDoubleJump = false;
+                        this.player.hasDoubleJumped = true;
+                        console.log('Double jump!');
+                    }
+                }
+            }
+            
+            handleDuck() {
+                if (this.gameState === 'playing' && !this.player.isJumping) {
+                    this.player.isDucking = true;
+                    console.log('Player is now ducking');
+                }
+            }
+            
+            handleDuckRelease() {
+                if (this.gameState === 'playing') {
+                    this.player.isDucking = false;
+                    console.log('Player stopped ducking');
+                }
+            }
+            
+            startGame() {
+                this.gameState = 'playing';
+                this.score = 0;
+                this.gameSpeed = 2;
+                this.jumpScreenShown = false;
+                this.player.y = this.player.groundY;
+                this.player.velocityY = 0;
+                this.player.isJumping = false;
+                this.player.isDucking = false;
+                this.player.canDoubleJump = false;
+                this.player.hasDoubleJumped = false;
+                this.obstacles = [];
+                this.obstacleTimer = 0;
+                this.birds = [];
+                this.birdTimer = 0;
+                
+                // Track game start
+                if (typeof trackGameStart === 'function') {
+                    trackGameStart();
+                }
+                
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('gameOverScreen').style.display = 'none';
+                document.getElementById('jumpScreen').style.display = 'none';
+            }
+            
+            showJumpScreen() {
+                this.jumpScreenShown = true;
+                this.gameState = 'paused';
+                document.getElementById('jumpScreen').style.display = 'flex';
+                
+                // Track jump screen
+                if (typeof trackJumpScreen === 'function') {
+                    trackJumpScreen();
+                }
+                
+                // Spill videoen
+                const video = document.getElementById('jumpVideo');
+                video.currentTime = 0;
+                video.play();
+            }
+            
+            gameOver() {
+                this.gameState = 'gameOver';
+                document.getElementById('finalScore').textContent = `Poeng: ${Math.floor(this.score)}`;
+                
+                // Track final score
+                if (typeof trackGameScore === 'function') {
+                    trackGameScore(Math.floor(this.score));
+                }
+                
+                document.getElementById('gameOverScreen').style.display = 'flex';
+            }
+            
+            update() {
+                if (this.gameState !== 'playing') return;
+                
+                // Oppdater spiller
+                this.updatePlayer();
+                
+                // Oppdater obstacles
+                this.updateObstacles();
+                
+                // Oppdater fugler
+                this.updateBirds();
+                
+                // Generer nye obstacles
+                this.generateObstacles();
+                
+                // Generer nye fugler
+                this.generateBirds();
+                
+                // Oppdater score
+                this.score += 0.1;
+                document.getElementById('score').textContent = `Poeng: ${Math.floor(this.score)}`;
+                
+                // Debug: vis bilde-status
+                if (this.birds.length > 0 && !this.birdImageLoaded) {
+                    console.log('Bird image not loaded, using fallback');
+                }
+                
+                // Sjekk om spilleren nådde 200 poeng
+                if (Math.floor(this.score) >= 200 && !this.jumpScreenShown) {
+                    this.showJumpScreen();
+                }
+                
+                // Øk hastighet over tid
+                this.gameSpeed += 0.001;
+            }
+            
+            updatePlayer() {
+                // Ingen animasjon når vi bruker enkelt bilde
+                
+                // Fysikk
+                if (this.player.isJumping) {
+                    this.player.velocityY += this.gravity;
+                    this.player.y += this.player.velocityY;
+                    
+                    if (this.player.y >= this.player.groundY) {
+                        this.player.y = this.player.groundY;
+                        this.player.velocityY = 0;
+                        this.player.isJumping = false;
+                        this.player.canDoubleJump = false;
+                        this.player.hasDoubleJumped = false;
+                    }
+                }
+            }
+            
+            updateObstacles() {
+                for (let i = this.obstacles.length - 1; i >= 0; i--) {
+                    const obstacle = this.obstacles[i];
+                    obstacle.x -= this.gameSpeed;
+                    
+                    // Fjern obstacles som er utenfor skjermen
+                    if (obstacle.x + obstacle.width < 0) {
+                        this.obstacles.splice(i, 1);
+                        continue;
+                    }
+                    
+                    // Sjekk kollisjon
+                    if (this.checkCollision(this.player, obstacle)) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+            }
+            
+            generateObstacles() {
+                this.obstacleTimer++;
+                
+                if (this.obstacleTimer > 120 - this.gameSpeed * 10) {
+                    const obstacleType = Math.random() < 0.7 ? 'small' : 'large';
+                    const obstacle = {
+                        x: this.canvas.width,
+                        y: this.player.groundY,
+                        width: obstacleType === 'small' ? 20 : 30,
+                        height: obstacleType === 'small' ? 30 : 50,
+                        type: obstacleType
+                    };
+                    
+                    this.obstacles.push(obstacle);
+                    this.obstacleTimer = 0;
+                }
+            }
+            
+            updateBirds() {
+                for (let i = this.birds.length - 1; i >= 0; i--) {
+                    const bird = this.birds[i];
+                    bird.x -= this.gameSpeed + 1; // Fugler flyr litt raskere
+                    
+                    // Fjern fugler som har flydd ut av skjermen
+                    if (bird.x + bird.width < 0) {
+                        this.birds.splice(i, 1);
+                        continue;
+                    }
+                    
+                    // Sjekk kollisjon med spiller
+                    if (this.checkCollision(this.player, bird)) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+            }
+            
+            generateBirds() {
+                this.birdTimer++;
+                
+                if (this.birdTimer > this.birdInterval / 16) { // 60 FPS
+                    const birdHeight = this.player.height * 0.4; // Mindre fugl (40% av løperen)
+                    const birdWidth = birdHeight * 1.0; // Mer kvadratisk form
+                    
+                    const bird = {
+                        x: this.canvas.width,
+                        y: this.player.groundY - birdHeight - 20 - Math.random() * 30, // Flyr lavere ned
+                        width: birdWidth,
+                        height: birdHeight,
+                        type: 'bird'
+                    };
+                    
+                    this.birds.push(bird);
+                    this.birdTimer = 0;
+                }
+            }
+            
+            checkCollision(player, obstacle) {
+                // Juster kollisjonsområde for mer nøyaktig deteksjon
+                const playerMargin = 8; // Reduser kollisjonsområde
+                const obstacleMargin = 4; // Reduser obstacle-kollisjonsområde
+                
+                // Hvis spilleren ducker, reduser høyde for kollisjonsdeteksjon
+                let playerHeight = player.height;
+                let playerY = player.y;
+                
+                if (player.isDucking) {
+                    playerHeight = player.height * 0.7; // Samme som i drawPlayer
+                    playerY = player.groundY - playerHeight;
+                }
+                
+                return player.x + playerMargin < obstacle.x + obstacle.width - obstacleMargin &&
+                       player.x + player.width - playerMargin > obstacle.x + obstacleMargin &&
+                       playerY + playerMargin < obstacle.y + obstacle.height - obstacleMargin &&
+                       playerY + playerHeight - playerMargin > obstacle.y + obstacleMargin;
+            }
+            
+            render() {
+                // Tøm canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Tegn bakgrunn
+                this.drawBackground();
+                
+                // Tegn obstacles
+                this.drawObstacles();
+                
+                // Tegn fugler
+                this.drawBirds();
+                
+                // Tegn spiller
+                this.drawPlayer();
+            }
+            
+            drawBackground() {
+                // Himmel med gradient
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height * 0.7);
+                gradient.addColorStop(0, '#87CEEB');
+                gradient.addColorStop(1, '#E0F6FF');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height * 0.7);
+                
+                // Fjell i bakgrunnen
+                this.ctx.fillStyle = '#8B7355';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, this.canvas.height * 0.4);
+                this.ctx.lineTo(this.canvas.width * 0.3, this.canvas.height * 0.2);
+                this.ctx.lineTo(this.canvas.width * 0.6, this.canvas.height * 0.3);
+                this.ctx.lineTo(this.canvas.width, this.canvas.height * 0.35);
+                this.ctx.lineTo(this.canvas.width, this.canvas.height * 0.7);
+                this.ctx.lineTo(0, this.canvas.height * 0.7);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Terreng med gradient
+                const groundGradient = this.ctx.createLinearGradient(0, this.canvas.height * 0.7, 0, this.canvas.height);
+                groundGradient.addColorStop(0, '#8FBC8F');
+                groundGradient.addColorStop(0.5, '#9ACD32');
+                groundGradient.addColorStop(1, '#556B2F');
+                this.ctx.fillStyle = groundGradient;
+                this.ctx.fillRect(0, this.canvas.height * 0.7, this.canvas.width, this.canvas.height * 0.3);
+                
+                // Tegn skyer med bedre detaljer
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                for (let i = 0; i < 4; i++) {
+                    const x = (i * 200 + Date.now() * 0.005) % (this.canvas.width + 150);
+                    this.drawCloud(x, 40 + i * 20, 40 + i * 10);
+                }
+                
+                // Legg til noen trær i bakgrunnen
+                this.drawBackgroundTrees();
+            }
+            
+            drawCloud(x, y, size) {
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.4, y, size * 0.8, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.8, y, size * 0.6, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.2, y - size * 0.3, size * 0.7, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.6, y - size * 0.3, size * 0.5, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            drawBackgroundTrees() {
+                this.ctx.fillStyle = '#8B4513';
+                for (let i = 0; i < 3; i++) {
+                    const x = (i * 300 + Date.now() * 0.002) % (this.canvas.width + 200);
+                    // Trestamme
+                    this.ctx.fillRect(x, this.canvas.height * 0.6, 15, 60);
+                    // Trekrone
+                    this.ctx.fillStyle = '#228B22';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x + 7, this.canvas.height * 0.6, 25, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.fillStyle = '#8B4513';
+                }
+            }
+            
+            drawObstacles() {
+                this.obstacles.forEach(obstacle => {
+                    if (obstacle.type === 'small') {
+                        this.drawSmallStone(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                    } else {
+                        this.drawLargeStone(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                    }
+                    
+                });
+            }
+            
+            drawBirds() {
+                this.birds.forEach(bird => {
+                    if (this.birdImageLoaded && this.birdImage.complete) {
+                        // Sørg for at bildet tegnes riktig med transparens
+                        this.ctx.save();
+                        this.ctx.globalAlpha = 1.0;
+                        this.ctx.globalCompositeOperation = 'source-over';
+                        
+                        // Tegn fugl-bildet
+                        this.ctx.drawImage(
+                            this.birdImage,
+                            bird.x, bird.y, bird.width, bird.height
+                        );
+                        
+                        this.ctx.restore();
+                    } else {
+                        // Fallback: tegn en enkel fugl-form
+                        this.ctx.fillStyle = '#8B4513';
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(bird.x + bird.width/2, bird.y + bird.height/2, 
+                                        bird.width/2, bird.height/2, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // Vinger
+                        this.ctx.fillStyle = '#654321';
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(bird.x + bird.width/3, bird.y + bird.height/3, 
+                                        bird.width/3, bird.height/4, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // Debug tekst
+                        this.ctx.fillStyle = 'white';
+                        this.ctx.font = '10px Arial';
+                        this.ctx.fillText('Bird fallback', bird.x, bird.y - 5);
+                    }
+                });
+            }
+            
+            drawSmallStone(x, y, width, height) {
+                // Tegn realistisk liten stein
+                this.ctx.fillStyle = '#708090';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2, y + height/2, width/2, height/2, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Legg til tekstur og skygger
+                this.ctx.fillStyle = '#556B7F';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2 - 2, y + height/2 - 2, width/2 - 3, height/2 - 3, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Høylys
+                this.ctx.fillStyle = '#B0C4DE';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2 + 1, y + height/2 - 3, width/4, height/4, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            drawLargeStone(x, y, width, height) {
+                // Tegn realistisk stor stein med flere lag
+                this.ctx.fillStyle = '#2F4F4F';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2, y + height/2, width/2, height/2, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Midterste lag
+                this.ctx.fillStyle = '#696969';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2 - 1, y + height/2 - 1, width/2 - 4, height/2 - 4, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Indre lag
+                this.ctx.fillStyle = '#808080';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2 - 2, y + height/2 - 2, width/2 - 8, height/2 - 8, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Høylys
+                this.ctx.fillStyle = '#D3D3D3';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + width/2 + 2, y + height/2 - 4, width/6, height/6, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Legg til noen sprekker for realistisk utseende
+                this.ctx.strokeStyle = '#1C1C1C';
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x + width/3, y + height/4);
+                this.ctx.lineTo(x + width/2, y + height/2);
+                this.ctx.stroke();
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(x + width*2/3, y + height/3);
+                this.ctx.lineTo(x + width/2, y + height*2/3);
+                this.ctx.stroke();
+            }
+            
+            drawPlayer() {
+                // Tegn løper med enkelt bilde eller duck-bilde
+                if (this.player.isDucking && this.duckImageLoaded) {
+                    // Tegn duck-bildet (mann på huk)
+                    const duckHeight = this.player.height * 0.7; // Litt lavere når på huk
+                    const duckY = this.player.groundY - duckHeight;
+                    
+                    this.ctx.drawImage(
+                        this.duckImage,
+                        this.player.x, duckY, this.player.width, duckHeight
+                    );
+                    
+                    // Skygge for ducking
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                    const shadowWidth = (this.player.width - 6) * 0.67;
+                    const shadowX = this.player.x + 3 + ((this.player.width - 6) - shadowWidth) / 2;
+                    this.ctx.fillRect(shadowX, this.player.groundY + 1, shadowWidth, 3);
+                    
+                } else if (this.imageLoaded) {
+                    // Legg til gradvis skygge basert på hopp-høyde
+                    const jumpHeight = this.player.groundY - this.player.y;
+                    const shadowOpacity = Math.max(0, 0.3 - (jumpHeight * 0.02)); // Gradvis fade-out
+                    const shadowSize = Math.max(0, 4 - (jumpHeight * 0.1)); // Gradvis størrelse-reduksjon
+                    
+                    if (shadowOpacity > 0) {
+                        this.ctx.fillStyle = `rgba(0, 0, 0, ${shadowOpacity})`;
+                        const shadowWidth = (this.player.width - 6) * 0.67; // 2/3 av bredden
+                        const shadowX = this.player.x + 3 + ((this.player.width - 6) - shadowWidth) / 2; // Sentrert
+                        this.ctx.fillRect(shadowX, this.player.groundY + 1, shadowWidth, shadowSize);
+                    }
+                    
+                    // Tegn løper-bildet
+                    this.ctx.drawImage(
+                        this.runnerImage,
+                        this.player.x, this.player.y - this.player.height, this.player.width, this.player.height
+                    );
+                    
+                } else {
+                    // Fallback: tegn en enkel firkant mens bilde laster
+                    this.ctx.fillStyle = '#FF6347';
+                    this.ctx.fillRect(this.player.x, this.player.y - this.player.height, this.player.width, this.player.height);
+                    
+                    // Vis tekst at bilde laster
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = '12px Arial';
+                    this.ctx.fillText('Loading image...', this.player.x, this.player.y - this.player.height - 5);
+                }
+                
+                // Legg til løpe-effekter (kun når ikke på huk)
+                if (!this.player.isDucking) {
+                    this.drawRunningEffects();
+                }
+                
+            }
+            
+            drawRunningEffects() {
+                // Tegn støvpartikler kun når løperen løper på bakken
+                if (this.gameState === 'playing') {
+                    const jumpHeight = this.player.groundY - this.player.y;
+                    const isOnGround = jumpHeight < 2; // Kun når på bakken
+                    
+                    if (isOnGround) {
+                        this.ctx.fillStyle = 'rgba(139, 69, 19, 0.6)';
+                        for (let i = 0; i < 3; i++) {
+                            const offset = Math.random() * 5;
+                            const size = Math.random() * 2 + 1;
+                            this.ctx.beginPath();
+                            this.ctx.arc(this.player.x - 5 - offset, this.player.groundY + Math.random() * 3, size, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                    }
+                }
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Global functions for buttons
+        let game;
+        
+        function startGame() {
+            console.log('startGame() called');
+            if (!game) {
+                console.log('Creating new game instance');
+                game = new RulleSteinGame();
+            } else {
+                console.log('Using existing game instance');
+            }
+            console.log('Calling game.startGame()');
+            game.startGame();
+        }
+        
+        function restartGame() {
+            if (game) {
+                game.startGame();
+            }
+        }
+        
+        function closeJumpScreen() {
+            if (game) {
+                document.getElementById('jumpScreen').style.display = 'none';
+                game.gameState = 'playing';
+            }
+        }
+        
+        // Initialize game when page loads but don't start it
+        window.addEventListener('load', () => {
+            console.log('Page loaded, initializing game');
+            game = new RulleSteinGame();
+        });
+    </script>
+</body>
+</html>
