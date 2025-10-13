@@ -596,12 +596,25 @@
                     const birdHeight = this.player.height * 0.4; // Mindre fugl (40% av løperen)
                     const birdWidth = birdHeight * 1.0; // Mer kvadratisk form
                     
+                    // Tilfeldig høyde: lav fugl eller høy fugl
+                    const isHighBird = Math.random() < 0.3; // 30% sjanse for høy fugl
+                    let birdY;
+                    
+                    if (isHighBird) {
+                        // Høy fugl - krever dobbelt-hopp
+                        birdY = this.player.groundY - birdHeight - 100 - Math.random() * 50;
+                    } else {
+                        // Lav fugl - kan duckes
+                        birdY = this.player.groundY - birdHeight - 20 - Math.random() * 30;
+                    }
+                    
                     const bird = {
                         x: this.canvas.width,
-                        y: this.player.groundY - birdHeight - 20 - Math.random() * 30, // Flyr lavere ned
+                        y: birdY,
                         width: birdWidth,
                         height: birdHeight,
-                        type: 'bird'
+                        type: 'bird',
+                        isHigh: isHighBird
                     };
                     
                     this.birds.push(bird);
@@ -610,9 +623,15 @@
             }
             
             checkCollision(player, obstacle) {
-                // Juster kollisjonsområde for mer nøyaktig deteksjon
-                const playerMargin = 8; // Reduser kollisjonsområde
-                const obstacleMargin = 4; // Reduser obstacle-kollisjonsområde
+                // Bedre kollisjonsdeteksjon med forskjellige marginer for steiner og fugler
+                let playerMargin = 6;
+                let obstacleMargin = 2;
+                
+                // Spesielle marginer for fugler (mer nøyaktig)
+                if (obstacle.type === 'bird') {
+                    playerMargin = 4;
+                    obstacleMargin = 1;
+                }
                 
                 // Hvis spilleren ducker, reduser høyde for kollisjonsdeteksjon
                 let playerHeight = player.height;
@@ -623,10 +642,21 @@
                     playerY = player.groundY - playerHeight;
                 }
                 
-                return player.x + playerMargin < obstacle.x + obstacle.width - obstacleMargin &&
-                       player.x + player.width - playerMargin > obstacle.x + obstacleMargin &&
-                       playerY + playerMargin < obstacle.y + obstacle.height - obstacleMargin &&
-                       playerY + playerHeight - playerMargin > obstacle.y + obstacleMargin;
+                // Mer nøyaktig kollisjonsdeteksjon
+                const collision = player.x + playerMargin < obstacle.x + obstacle.width - obstacleMargin &&
+                                player.x + player.width - playerMargin > obstacle.x + obstacleMargin &&
+                                playerY + playerMargin < obstacle.y + obstacle.height - obstacleMargin &&
+                                playerY + playerHeight - playerMargin > obstacle.y + obstacleMargin;
+                
+                // Debug for fugler
+                if (obstacle.type === 'bird' && collision) {
+                    console.log('Bird collision detected!', {
+                        player: {x: player.x, y: playerY, w: player.width, h: playerHeight},
+                        bird: {x: obstacle.x, y: obstacle.y, w: obstacle.width, h: obstacle.height}
+                    });
+                }
+                
+                return collision;
             }
             
             render() {
