@@ -35,6 +35,30 @@
                 'event_label': 'rulle_stein'
             });
         }
+        
+        function trackWow500Screen() {
+            gtag('event', 'wow_500_screen', {
+                'event_category': 'game',
+                'event_label': 'rulle_stein',
+                'value': 500
+            });
+        }
+        
+        function trackGameOver(score) {
+            gtag('event', 'game_over', {
+                'event_category': 'game',
+                'event_label': 'rulle_stein',
+                'value': score
+            });
+        }
+        
+        function trackPlayerAction(action) {
+            gtag('event', 'player_action', {
+                'event_category': 'game',
+                'event_label': action,
+                'custom_parameter': 'rulle_stein'
+            });
+        }
     </script>
     <style>
         * {
@@ -467,12 +491,22 @@
                         this.player.canDoubleJump = true;
                         this.player.hasDoubleJumped = false;
                         console.log('First jump');
+                        
+                        // Track jump action
+                        if (typeof trackPlayerAction === 'function') {
+                            trackPlayerAction('jump');
+                        }
                     } else if (this.player.canDoubleJump && !this.player.hasDoubleJumped) {
                         // Dobbelthopp
                         this.player.velocityY = this.jumpPower * 1.2; // Høyere hopp
                         this.player.canDoubleJump = false;
                         this.player.hasDoubleJumped = true;
                         console.log('Double jump!');
+                        
+                        // Track double jump action
+                        if (typeof trackPlayerAction === 'function') {
+                            trackPlayerAction('double_jump');
+                        }
                     }
                 }
             }
@@ -481,6 +515,11 @@
                 if (this.gameState === 'playing' && !this.player.isJumping) {
                     this.player.isDucking = true;
                     console.log('Player is now ducking');
+                    
+                    // Track duck action
+                    if (typeof trackPlayerAction === 'function') {
+                        trackPlayerAction('duck');
+                    }
                 }
             }
             
@@ -544,6 +583,11 @@
                 this.gameState = 'paused';
                 document.getElementById('wow500Screen').style.display = 'flex';
                 
+                // Track Wow 500 screen
+                if (typeof trackWow500Screen === 'function') {
+                    trackWow500Screen();
+                }
+                
                 // Auto-hide etter 3 sekunder
                 setTimeout(() => {
                     this.closeWow500Screen();
@@ -563,6 +607,11 @@
                 // Track final score
                 if (typeof trackGameScore === 'function') {
                     trackGameScore(Math.floor(this.score));
+                }
+                
+                // Track game over event
+                if (typeof trackGameOver === 'function') {
+                    trackGameOver(Math.floor(this.score));
                 }
                 
                 // Spill game over videoen
