@@ -623,9 +623,9 @@
             }
             
             checkCollision(player, obstacle) {
-                // Bedre kollisjonsdeteksjon med forskjellige marginer for steiner og fugler
-                let playerMargin = 6;
-                let obstacleMargin = 2;
+                // Mer tilgivende kollisjonsdeteksjon - spilleren kan lande på steiner
+                let playerMargin = 8;
+                let obstacleMargin = 6;
                 
                 // Spesielle marginer for fugler (mer nøyaktig)
                 if (obstacle.type === 'bird') {
@@ -642,7 +642,7 @@
                     playerY = player.groundY - playerHeight;
                 }
                 
-                // Mer nøyaktig kollisjonsdeteksjon
+                // Mer tilgivende kollisjonsdeteksjon - spilleren kan lande på steiner
                 const collision = player.x + playerMargin < obstacle.x + obstacle.width - obstacleMargin &&
                                 player.x + player.width - playerMargin > obstacle.x + obstacleMargin &&
                                 playerY + playerMargin < obstacle.y + obstacle.height - obstacleMargin &&
