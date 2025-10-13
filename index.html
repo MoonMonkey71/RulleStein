@@ -88,13 +88,44 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: white;
             z-index: 10;
+        }
+        
+        #gameOverVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #gameOverOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        
+        #gameOverOverlay h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        #gameOverOverlay p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
         
         #jumpScreen {
@@ -199,9 +230,14 @@
         </div>
         
         <div id="gameOverScreen">
-            <h1>Game Over!</h1>
-            <p id="finalScore">Poeng: 0</p>
-            <button onclick="restartGame()">Spill Igjen</button>
+            <video id="gameOverVideo" autoplay muted>
+                <source src="Pic/gameover01.mp4" type="video/mp4">
+            </video>
+            <div id="gameOverOverlay">
+                <h1>Game Over!</h1>
+                <p id="finalScore">Poeng: 0</p>
+                <button onclick="restartGame()">Spill Igjen</button>
+            </div>
         </div>
         
         <div id="jumpScreen">
@@ -449,6 +485,10 @@
                 document.getElementById('startScreen').style.display = 'none';
                 document.getElementById('gameOverScreen').style.display = 'none';
                 document.getElementById('jumpScreen').style.display = 'none';
+                
+                // Stopp game over videoen
+                const gameOverVideo = document.getElementById('gameOverVideo');
+                gameOverVideo.pause();
             }
             
             showJumpScreen() {
@@ -475,6 +515,11 @@
                 if (typeof trackGameScore === 'function') {
                     trackGameScore(Math.floor(this.score));
                 }
+                
+                // Spill game over videoen
+                const gameOverVideo = document.getElementById('gameOverVideo');
+                gameOverVideo.currentTime = 0;
+                gameOverVideo.play();
                 
                 document.getElementById('gameOverScreen').style.display = 'flex';
             }
@@ -623,9 +668,9 @@
             }
             
             checkCollision(player, obstacle) {
-                // Bedre kollisjonsdeteksjon med forskjellige marginer for steiner og fugler
-                let playerMargin = 6;
-                let obstacleMargin = 2;
+                // Mer tilgivende kollisjonsdeteksjon - spilleren kan lande på steiner
+                let playerMargin = 8;
+                let obstacleMargin = 6;
                 
                 // Spesielle marginer for fugler (mer nøyaktig)
                 if (obstacle.type === 'bird') {
@@ -642,7 +687,7 @@
                     playerY = player.groundY - playerHeight;
                 }
                 
-                // Mer nøyaktig kollisjonsdeteksjon
+                // Mer tilgivende kollisjonsdeteksjon - spilleren kan lande på steiner
                 const collision = player.x + playerMargin < obstacle.x + obstacle.width - obstacleMargin &&
                                 player.x + player.width - playerMargin > obstacle.x + obstacleMargin &&
                                 playerY + playerMargin < obstacle.y + obstacle.height - obstacleMargin &&
