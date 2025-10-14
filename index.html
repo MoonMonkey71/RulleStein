@@ -44,6 +44,14 @@
             });
         }
         
+        function trackWow150Screen() {
+            gtag('event', 'wow_150_screen', {
+                'event_category': 'game',
+                'event_label': 'rulle_stein',
+                'value': 150
+            });
+        }
+        
         function trackGameOver(score) {
             gtag('event', 'game_over', {
                 'event_category': 'game',
@@ -211,7 +219,20 @@
             z-index: 1000;
         }
         
-        #wow500Image {
+        #wow150Screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        #wow500Image, #wow150Image {
             max-width: 80%;
             max-height: 80%;
             object-fit: contain;
@@ -303,6 +324,10 @@
         <div id="wow500Screen">
             <img id="wow500Image" src="Pic/wow500.png?v=1" alt="Wow 500!" onclick="closeWow500Screen()">
         </div>
+        
+        <div id="wow150Screen">
+            <img id="wow150Image" src="Pic/wow150.png?v=1" alt="Wow 150!" onclick="closeWow150Screen()">
+        </div>
     </div>
 
     <script>
@@ -320,6 +345,7 @@
                 this.gameSpeed = 2;
                 this.jumpScreenShown = false;
                 this.wow500Shown = false;
+                this.wow150Shown = false;
                 this.gravity = 0.6;
                 this.jumpPower = -12;
                 
@@ -536,6 +562,7 @@
                 this.gameSpeed = 2;
                 this.jumpScreenShown = false;
                 this.wow500Shown = false;
+                this.wow150Shown = false;
                 this.player.y = this.player.groundY;
                 this.player.velocityY = 0;
                 this.player.isJumping = false;
@@ -556,6 +583,7 @@
                 document.getElementById('gameOverScreen').style.display = 'none';
                 document.getElementById('jumpScreen').style.display = 'none';
                 document.getElementById('wow500Screen').style.display = 'none';
+                document.getElementById('wow150Screen').style.display = 'none';
                 
                 // Stopp game over videoen
                 const gameOverVideo = document.getElementById('gameOverVideo');
@@ -594,10 +622,32 @@
                 }, 3000);
             }
             
+            showWow150Screen() {
+                this.wow150Shown = true;
+                this.gameState = 'paused';
+                document.getElementById('wow150Screen').style.display = 'flex';
+                
+                // Track Wow 150 screen
+                if (typeof trackWow150Screen === 'function') {
+                    trackWow150Screen();
+                }
+                
+                // Auto-hide etter 3 sekunder
+                setTimeout(() => {
+                    this.closeWow150Screen();
+                }, 3000);
+            }
+            
             closeWow500Screen() {
                 this.wow500Shown = false;
                 this.gameState = 'playing';
                 document.getElementById('wow500Screen').style.display = 'none';
+            }
+            
+            closeWow150Screen() {
+                this.wow150Shown = false;
+                this.gameState = 'playing';
+                document.getElementById('wow150Screen').style.display = 'none';
             }
             
             gameOver() {
@@ -652,6 +702,11 @@
                 // Sjekk om spilleren nådde 75 poeng
                 if (Math.floor(this.score) >= 75 && !this.jumpScreenShown) {
                     this.showJumpScreen();
+                }
+                
+                // Sjekk om spilleren nådde 150 poeng
+                if (Math.floor(this.score) >= 150 && !this.wow150Shown) {
+                    this.showWow150Screen();
                 }
                 
                 // Sjekk om spilleren nådde 500 poeng
@@ -1108,6 +1163,12 @@
         function closeWow500Screen() {
             if (game) {
                 game.closeWow500Screen();
+            }
+        }
+        
+        function closeWow150Screen() {
+            if (game) {
+                game.closeWow150Screen();
             }
         }
         
