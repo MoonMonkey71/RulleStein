@@ -566,6 +566,7 @@
                 this.jumpScreenShown = false;
                 this.wow500Shown = false;
                 this.wow150Shown = false; // Reset kun når spillet starter på nytt
+                this.wow150LastShown = 0; // Timestamp for siste gang Wow 150 ble vist
                 this.player.y = this.player.groundY;
                 this.player.velocityY = 0;
                 this.player.isJumping = false;
@@ -631,6 +632,7 @@
             showWow150Screen() {
                 console.log('showWow150Screen called');
                 this.wow150Shown = true;
+                this.wow150LastShown = Date.now(); // Sett timestamp
                 this.gameState = 'paused';
                 document.getElementById('wow150Screen').style.display = 'flex';
                 
@@ -727,9 +729,9 @@
                 }
                 
                 // Sjekk om spilleren nådde 10 poeng (TEST MODE)
-                // Bruk samme logikk som jumpscreen
-                if (Math.floor(this.score) === 10 && !this.wow150Shown) {
-                    console.log('Score reached 10 (TEST MODE):', Math.floor(this.score), 'wow150Shown:', this.wow150Shown);
+                // Bruk timestamp for å forhindre multiple calls
+                if (Math.floor(this.score) === 10 && (Date.now() - this.wow150LastShown) > 5000) {
+                    console.log('Score reached 10 (TEST MODE):', Math.floor(this.score), 'wow150LastShown:', this.wow150LastShown);
                     this.showWow150Screen();
                 }
                 
