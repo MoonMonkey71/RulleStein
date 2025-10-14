@@ -644,6 +644,11 @@
                     console.log('Auto-hiding Wow 150 screen after 3 seconds');
                     this.closeWow150Screen();
                 }, 3000);
+                
+                // Sjekk om wow150Shown blir satt tilbake til true på en annen måte
+                setTimeout(() => {
+                    console.log('wow150Shown after 0.5 seconds:', this.wow150Shown);
+                }, 500);
             }
             
             closeWow500Screen() {
