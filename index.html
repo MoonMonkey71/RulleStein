@@ -673,32 +673,37 @@
             }
             
             update() {
-                if (this.gameState !== 'playing') return;
-                
-                // Oppdater spiller
-                this.updatePlayer();
-                
-                // Oppdater obstacles
-                this.updateObstacles();
-                
-                // Oppdater fugler
-                this.updateBirds();
-                
-                // Generer nye obstacles
-                this.generateObstacles();
-                
-                // Generer nye fugler
-                this.generateBirds();
-                
-                // Oppdater score
-                this.score += 0.1;
-                document.getElementById('score').textContent = `Poeng: ${Math.floor(this.score)}`;
-                
-                // Debug: vis bilde-status
-                if (this.birds.length > 0 && !this.birdImageLoaded) {
-                    console.log('Bird image not loaded, using fallback');
+                // Fortsett å oppdatere score og sjekk milepæler selv når pauset
+                if (this.gameState === 'playing') {
+                    // Oppdater spiller
+                    this.updatePlayer();
+                    
+                    // Oppdater obstacles
+                    this.updateObstacles();
+                    
+                    // Oppdater fugler
+                    this.updateBirds();
+                    
+                    // Generer nye obstacles
+                    this.generateObstacles();
+                    
+                    // Generer nye fugler
+                    this.generateBirds();
+                    
+                    // Oppdater score
+                    this.score += 0.1;
+                    document.getElementById('score').textContent = `Poeng: ${Math.floor(this.score)}`;
+                    
+                    // Debug: vis bilde-status
+                    if (this.birds.length > 0 && !this.birdImageLoaded) {
+                        console.log('Bird image not loaded, using fallback');
+                    }
+                    
+                    // Øk hastighet over tid
+                    this.gameSpeed += 0.001;
                 }
                 
+                // Sjekk milepæler uansett gameState
                 // Sjekk om spilleren nådde 75 poeng
                 if (Math.floor(this.score) >= 75 && !this.jumpScreenShown) {
                     this.showJumpScreen();
@@ -713,9 +718,6 @@
                 if (Math.floor(this.score) >= 500 && !this.wow500Shown) {
                     this.showWow500Screen();
                 }
-                
-                // Øk hastighet over tid
-                this.gameSpeed += 0.001;
             }
             
             updatePlayer() {
