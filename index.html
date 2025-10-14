@@ -567,6 +567,7 @@
                 this.wow500Shown = false;
                 this.wow150Shown = false; // Reset kun når spillet starter på nytt
                 this.wow150LastShown = 0; // Timestamp for siste gang Wow 150 ble vist
+                this.wow500LastShown = 0; // Timestamp for siste gang Wow 500 ble vist
                 this.player.y = this.player.groundY;
                 this.player.velocityY = 0;
                 this.player.isJumping = false;
@@ -614,6 +615,7 @@
             showWow500Screen() {
                 console.log('showWow500Screen called');
                 this.wow500Shown = true;
+                this.wow500LastShown = Date.now(); // Sett timestamp
                 this.gameState = 'paused';
                 document.getElementById('wow500Screen').style.display = 'flex';
                 
@@ -728,15 +730,17 @@
                     this.showJumpScreen();
                 }
                 
-                // Sjekk om spilleren nådde 10 poeng (TEST MODE)
+                // Sjekk om spilleren nådde 150 poeng
                 // Bruk timestamp for å forhindre multiple calls
-                if (Math.floor(this.score) === 10 && (Date.now() - this.wow150LastShown) > 5000) {
-                    console.log('Score reached 10 (TEST MODE):', Math.floor(this.score), 'wow150LastShown:', this.wow150LastShown);
+                if (Math.floor(this.score) >= 150 && (Date.now() - this.wow150LastShown) > 5000) {
+                    console.log('Score reached 150:', Math.floor(this.score), 'wow150LastShown:', this.wow150LastShown);
                     this.showWow150Screen();
                 }
                 
                 // Sjekk om spilleren nådde 500 poeng
-                if (Math.floor(this.score) >= 500 && !this.wow500Shown) {
+                // Bruk timestamp for å forhindre multiple calls
+                if (Math.floor(this.score) >= 500 && (Date.now() - this.wow500LastShown) > 5000) {
+                    console.log('Score reached 500:', Math.floor(this.score), 'wow500LastShown:', this.wow500LastShown);
                     this.showWow500Screen();
                 }
             }
