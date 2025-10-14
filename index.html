@@ -626,6 +626,8 @@
             }
             
             showWow150Screen() {
+                if (this.wow150Shown) return; // Forhindre multiple calls
+                
                 this.wow150Shown = true;
                 this.gameState = 'paused';
                 document.getElementById('wow150Screen').style.display = 'flex';
