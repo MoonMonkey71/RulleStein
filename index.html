@@ -725,9 +725,9 @@
                     this.showJumpScreen();
                 }
                 
-                // Sjekk om spilleren nådde 150 poeng
-                if (Math.floor(this.score) >= 150 && !this.wow150Shown) {
-                    console.log('Score reached 150:', Math.floor(this.score), 'wow150Shown:', this.wow150Shown);
+                // Sjekk om spilleren nådde 10 poeng (TEST MODE)
+                if (Math.floor(this.score) >= 10 && !this.wow150Shown) {
+                    console.log('Score reached 10 (TEST MODE):', Math.floor(this.score), 'wow150Shown:', this.wow150Shown);
                     this.showWow150Screen();
                 }
                 
