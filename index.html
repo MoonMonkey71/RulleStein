@@ -295,7 +295,7 @@
             </video>
             <div id="jumpScreenOverlay">
                 <h1>🎉 Gratulerer! 🎉</h1>
-                <p>Du nådde 200 poeng!</p>
+                <p>Du nådde 75 poeng!</p>
                 <button onclick="closeJumpScreen()">Fortsett Spill</button>
             </div>
         </div>
@@ -649,8 +649,8 @@
                     console.log('Bird image not loaded, using fallback');
                 }
                 
-                // Sjekk om spilleren nådde 200 poeng
-                if (Math.floor(this.score) >= 200 && !this.jumpScreenShown) {
+                // Sjekk om spilleren nådde 75 poeng
+                if (Math.floor(this.score) >= 75 && !this.jumpScreenShown) {
                     this.showJumpScreen();
                 }
                 
