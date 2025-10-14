@@ -562,7 +562,8 @@
                 this.gameSpeed = 2;
                 this.jumpScreenShown = false;
                 this.wow500Shown = false;
-                this.wow150Shown = false;
+                // this.wow150Shown = false; // Kommenter ut for testing
+                console.log('startGame: wow150Shown reset to false');
                 this.player.y = this.player.groundY;
                 this.player.velocityY = 0;
                 this.player.isJumping = false;
