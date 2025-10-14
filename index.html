@@ -628,6 +628,7 @@
             showWow150Screen() {
                 if (this.wow150Shown) return; // Forhindre multiple calls
                 
+                console.log('showWow150Screen called');
                 this.wow150Shown = true;
                 this.gameState = 'paused';
                 document.getElementById('wow150Screen').style.display = 'flex';
@@ -639,6 +640,7 @@
                 
                 // Auto-hide etter 3 sekunder
                 setTimeout(() => {
+                    console.log('Auto-hiding Wow 150 screen after 3 seconds');
                     this.closeWow150Screen();
                 }, 3000);
             }
@@ -652,9 +654,11 @@
             }
             
             closeWow150Screen() {
+                console.log('closeWow150Screen called');
                 this.wow150Shown = false;
                 this.gameState = 'playing';
                 document.getElementById('wow150Screen').style.display = 'none';
+                console.log('Wow 150 screen closed, gameState:', this.gameState);
             }
             
             gameOver() {
