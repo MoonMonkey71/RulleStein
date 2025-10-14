@@ -591,6 +591,7 @@
             }
             
             showJumpScreen() {
+                console.log('showJumpScreen called');
                 this.jumpScreenShown = true;
                 this.gameState = 'paused';
                 document.getElementById('jumpScreen').style.display = 'flex';
@@ -607,6 +608,7 @@
             }
             
             showWow500Screen() {
+                console.log('showWow500Screen called');
                 this.wow500Shown = true;
                 this.gameState = 'paused';
                 document.getElementById('wow500Screen').style.display = 'flex';
@@ -618,6 +620,7 @@
                 
                 // Auto-hide etter 3 sekunder
                 setTimeout(() => {
+                    console.log('Auto-hiding Wow 500 screen after 3 seconds');
                     this.closeWow500Screen();
                 }, 3000);
             }
@@ -641,9 +644,11 @@
             }
             
             closeWow500Screen() {
+                console.log('closeWow500Screen called');
                 this.wow500Shown = false;
                 this.gameState = 'playing';
                 document.getElementById('wow500Screen').style.display = 'none';
+                console.log('Wow 500 screen closed, gameState:', this.gameState);
             }
             
             closeWow150Screen() {
@@ -1162,9 +1167,11 @@
         }
         
         function closeJumpScreen() {
+            console.log('closeJumpScreen called');
             if (game) {
                 document.getElementById('jumpScreen').style.display = 'none';
                 game.gameState = 'playing';
+                console.log('Jump screen closed, gameState:', game.gameState);
             }
         }
         
