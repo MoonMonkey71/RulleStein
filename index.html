@@ -701,6 +701,11 @@
                     this.score += 0.1;
                     document.getElementById('score').textContent = `Poeng: ${Math.floor(this.score)}`;
                     
+                    // Debug score hver 10 poeng
+                    if (Math.floor(this.score) % 10 === 0 && Math.floor(this.score) > 0) {
+                        console.log('Current score:', Math.floor(this.score));
+                    }
+                    
                     // Debug: vis bilde-status
                     if (this.birds.length > 0 && !this.birdImageLoaded) {
                         console.log('Bird image not loaded, using fallback');
@@ -718,6 +723,7 @@
                 
                 // Sjekk om spilleren nådde 150 poeng
                 if (Math.floor(this.score) >= 150 && !this.wow150Shown) {
+                    console.log('Score reached 150:', Math.floor(this.score), 'wow150Shown:', this.wow150Shown);
                     this.showWow150Screen();
                 }
                 
