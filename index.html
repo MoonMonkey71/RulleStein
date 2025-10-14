@@ -654,11 +654,11 @@
             }
             
             closeWow150Screen() {
-                console.log('closeWow150Screen called');
+                console.log('closeWow150Screen called, wow150Shown before:', this.wow150Shown);
                 this.wow150Shown = false;
                 this.gameState = 'playing';
                 document.getElementById('wow150Screen').style.display = 'none';
-                console.log('Wow 150 screen closed, gameState:', this.gameState);
+                console.log('Wow 150 screen closed, gameState:', this.gameState, 'wow150Shown after:', this.wow150Shown);
             }
             
             gameOver() {
