@@ -732,14 +732,14 @@
                 
                 // Sjekk om spilleren nådde 150 poeng
                 // Bruk timestamp for å forhindre multiple calls
-                if (Math.floor(this.score) >= 150 && (Date.now() - this.wow150LastShown) > 5000) {
+                if (Math.floor(this.score) === 150 && (Date.now() - this.wow150LastShown) > 5000) {
                     console.log('Score reached 150:', Math.floor(this.score), 'wow150LastShown:', this.wow150LastShown);
                     this.showWow150Screen();
                 }
                 
                 // Sjekk om spilleren nådde 500 poeng
                 // Bruk timestamp for å forhindre multiple calls
-                if (Math.floor(this.score) >= 500 && (Date.now() - this.wow500LastShown) > 5000) {
+                if (Math.floor(this.score) === 500 && (Date.now() - this.wow500LastShown) > 5000) {
                     console.log('Score reached 500:', Math.floor(this.score), 'wow500LastShown:', this.wow500LastShown);
                     this.showWow500Screen();
                 }
