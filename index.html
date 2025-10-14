@@ -331,6 +331,9 @@
     </div>
 
     <script>
+        // Global variables for tracking
+        let wow150ShownGlobal = false;
+        
         class RulleSteinGame {
             constructor() {
                 this.canvas = document.getElementById('gameCanvas');
@@ -627,9 +630,10 @@
             }
             
             showWow150Screen() {
-                if (this.wow150Shown) return; // Forhindre multiple calls
+                if (wow150ShownGlobal) return; // Forhindre multiple calls
                 
-                console.log('showWow150Screen called, setting wow150Shown to true');
+                console.log('showWow150Screen called, setting wow150ShownGlobal to true');
+                wow150ShownGlobal = true;
                 this.wow150Shown = true;
                 this.gameState = 'paused';
                 document.getElementById('wow150Screen').style.display = 'flex';
@@ -645,9 +649,9 @@
                     this.closeWow150Screen();
                 }, 3000);
                 
-                // Sjekk om wow150Shown blir satt tilbake til true på en annen måte
+                // Sjekk om wow150ShownGlobal blir satt tilbake til true på en annen måte
                 setTimeout(() => {
-                    console.log('wow150Shown after 0.5 seconds:', this.wow150Shown);
+                    console.log('wow150ShownGlobal after 0.5 seconds:', wow150ShownGlobal);
                 }, 500);
             }
             
@@ -660,15 +664,16 @@
             }
             
             closeWow150Screen() {
-                console.log('closeWow150Screen called, wow150Shown before:', this.wow150Shown);
+                console.log('closeWow150Screen called, wow150ShownGlobal before:', wow150ShownGlobal);
+                wow150ShownGlobal = false;
                 this.wow150Shown = false;
                 this.gameState = 'playing';
                 document.getElementById('wow150Screen').style.display = 'none';
-                console.log('Wow 150 screen closed, gameState:', this.gameState, 'wow150Shown after:', this.wow150Shown);
+                console.log('Wow 150 screen closed, gameState:', this.gameState, 'wow150ShownGlobal after:', wow150ShownGlobal);
                 
-                // Sjekk om wow150Shown blir satt tilbake til false på en annen måte
+                // Sjekk om wow150ShownGlobal blir satt tilbake til false på en annen måte
                 setTimeout(() => {
-                    console.log('wow150Shown after 1 second:', this.wow150Shown);
+                    console.log('wow150ShownGlobal after 1 second:', wow150ShownGlobal);
                 }, 1000);
             }
             
@@ -737,9 +742,9 @@
                 }
                 
                 // Sjekk om spilleren nådde 10 poeng (TEST MODE)
-                // Bruk score-tracking i stedet for boolean
-                if (Math.floor(this.score) === 10 && !this.wow150Shown) {
-                    console.log('Score reached 10 (TEST MODE):', Math.floor(this.score), 'wow150Shown:', this.wow150Shown);
+                // Bruk global variabel i stedet for instans-variabel
+                if (Math.floor(this.score) === 10 && !wow150ShownGlobal) {
+                    console.log('Score reached 10 (TEST MODE):', Math.floor(this.score), 'wow150ShownGlobal:', wow150ShownGlobal);
                     this.showWow150Screen();
                 }
                 
