@@ -348,7 +348,7 @@
                 this.gameSpeed = 2;
                 this.jumpScreenShown = false;
                 this.wow500Shown = false;
-                this.wow150Shown = false;
+                // this.wow150Shown = false; // Ikke reset i constructor!
                 this.gravity = 0.6;
                 this.jumpPower = -12;
                 
@@ -565,7 +565,7 @@
                 this.gameSpeed = 2;
                 this.jumpScreenShown = false;
                 this.wow500Shown = false;
-                this.wow150Shown = false;
+                this.wow150Shown = false; // Reset kun når spillet starter på nytt
                 this.player.y = this.player.groundY;
                 this.player.velocityY = 0;
                 this.player.isJumping = false;
