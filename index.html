@@ -629,7 +629,7 @@
             showWow150Screen() {
                 if (this.wow150Shown) return; // Forhindre multiple calls
                 
-                console.log('showWow150Screen called');
+                console.log('showWow150Screen called, setting wow150Shown to true');
                 this.wow150Shown = true;
                 this.gameState = 'paused';
                 document.getElementById('wow150Screen').style.display = 'flex';
@@ -660,6 +660,11 @@
                 this.gameState = 'playing';
                 document.getElementById('wow150Screen').style.display = 'none';
                 console.log('Wow 150 screen closed, gameState:', this.gameState, 'wow150Shown after:', this.wow150Shown);
+                
+                // Sjekk om wow150Shown blir satt tilbake til false på en annen måte
+                setTimeout(() => {
+                    console.log('wow150Shown after 1 second:', this.wow150Shown);
+                }, 1000);
             }
             
             gameOver() {
